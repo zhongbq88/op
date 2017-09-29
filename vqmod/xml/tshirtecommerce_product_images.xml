@@ -1,0 +1,63 @@
+<modification>
+    <id>tshirtecommerce</id>
+    <version>4.1.5</version>
+    <vqmver>2.4.0</vqmver>
+    <author>Tshirtecommerce Team</author>
+    <file name="catalog/controller/product/product.php,system/storage/modification/catalog/controller/product/product.php">
+        <operation error="skip">
+            <search position="before">
+                <![CDATA[$this->model_catalog_product->updateViewed]]>
+            </search>
+            <add>
+                <![CDATA[
+                if (!defined('DS')) define('DS', DIRECTORY_SEPARATOR);
+				if (!defined('ROOT')) define('ROOT', dirname(DIR_SYSTEM).DS.'tshirtecommerce');
+                include_once(ROOT.'/opencart/includes/product_image.php');
+			]]>
+            </add>
+        </operation>
+    </file>
+
+    <file name="catalog/controller/module/featured.php,system/storage/modification/catalog/controller/module/featured.php,catalog/controller/extension/module/featured.php,system/storage/modification/catalog/controller/extension/module/featured.php,catalog/controller/product/category.php,system/storage/modification/catalog/controller/product/category.php,catalog/controller/product/manufacturer.php,system/storage/modification/catalog/controller/product/manufacturer.php,catalog/controller/product/search.php,system/storage/modification/catalog/controller/product/search.php,catalog/controller/product/special.php,system/storage/modification/catalog/controller/product/special.php">
+    	<operation error="skip">
+            <search position="before">
+                <![CDATA[$data['products'][]]]>
+            </search>
+            <add>
+                <![CDATA[
+                if (!defined('DS')) define('DS', DIRECTORY_SEPARATOR);
+				if (!defined('ROOT')) define('ROOT', dirname(DIR_SYSTEM).DS.'tshirtecommerce');
+                include(ROOT.'/opencart/includes/product_featured.php');
+			]]>
+            </add>
+        </operation>
+    </file>
+
+    <file name="catalog/controller/product/compare.php,system/storage/modification/catalog/controller/product/compare.php">
+        <operation error="skip">
+            <search position="before">
+                <![CDATA[$data['products'][$product_id] = array]]>
+            </search>
+            <add>
+                <![CDATA[
+                if (!defined('DS')) define('DS', DIRECTORY_SEPARATOR);
+				if (!defined('ROOT')) define('ROOT', dirname(DIR_SYSTEM).DS.'tshirtecommerce');
+                include(ROOT.'/opencart/includes/product_featured.php');
+			]]>
+            </add>
+        </operation>
+    </file>
+
+    <file name="catalog/view/theme/*/template/common/header.tpl,system/storage/modification/catalog/view/theme/*/template/common/header.tpl">
+    	<operation error="skip">
+            <search position="before" index="1">
+                <![CDATA[<link href]]>
+            </search>
+            <add>
+                <![CDATA[
+                <link href="tshirtecommerce/opencart/css/tshirtecommerce.css" rel="stylesheet" type="text/css" />
+			]]>
+            </add>
+        </operation>
+    </file>
+</modification>
