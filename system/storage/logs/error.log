@@ -1,0 +1,2 @@
+2017-09-29 5:05:50 - PHP Notice:  Undefined index: design_product_id in D:\xampp\htdocs\op\op\vqmod\vqcache\vq2-catalog_model_catalog_product.php on line 14
+2017-09-29 5:05:50 - PHP Notice:  Undefined index: design_product_title_img in D:\xampp\htdocs\op\op\vqmod\vqcache\vq2-catalog_model_catalog_product.php on line 15
