@@ -473,10 +473,10 @@
 					<?php }
 					$tscheck_class = explode(':', $tshirtecommerce_customize_design_btn);
 					if (count($tscheck_class) > 1) { ?>
-						<p><a id="button-design" style='<?php if(isset($tshirtecommerce_customize_design_btn)) echo $tshirtecommerce_customize_design_btn; ?>' href="<?php echo $tshirtecommerce_designer_link; ?>"><?php echo $tshirtecommerce_button_custom_your_design; ?></a>
+						<p><a id="button-design" class="btn btn-primary radius-2x shadow" href="<?php echo $tshirtecommerce_designer_link; ?>"><?php echo $tshirtecommerce_button_custom_your_design; ?></a>
 						</p>
 					<?php } else { ?>
-						<p><a id="button-design" class='<?php if(isset($tshirtecommerce_customize_design_btn)) echo $tshirtecommerce_customize_design_btn; ?>' href="<?php echo $tshirtecommerce_designer_link; ?>"><?php echo $tshirtecommerce_button_custom_your_design; ?></a>
+						<p><a id="button-design" class="btn btn-primary radius-2x shadow" href="<?php echo $tshirtecommerce_designer_link; ?>"><?php echo $tshirtecommerce_button_custom_your_design; ?></a>
 						</p>
 					<?php }
 				} ?>
