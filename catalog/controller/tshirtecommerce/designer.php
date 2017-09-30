@@ -108,7 +108,7 @@ class ControllerTshirtecommerceDesigner extends Controller {
 			if (isset($setting->site_name)) $this->document->setDescription($setting->meta_description);
 			if (isset($setting->site_name)) $this->document->setKeywords($setting->meta_keywords);			
 		}
-		
+		//echo $view;
 		$data['content'] = $view;
 		$data['column_left'] = $this->load->controller('common/column_left');
 		$data['column_right'] = $this->load->controller('common/column_right');

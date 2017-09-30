@@ -4677,7 +4677,10 @@ var design={
 								{
 									context.restore();
 								}
+								
 								canvasLoad(obj, i);
+								
+								
 							};
 							images.src = item.src;
 						}
@@ -4688,7 +4691,9 @@ var design={
 							images.onload = function() {
 								context.drawImage(images, item.left, item.top);
 								context.restore();
+								
 								canvasLoad(obj, i);
+								
 							};
 							images.src = mySrc;
 						}
@@ -4722,7 +4727,8 @@ var design={
 						
 			design.output[postion] = canvas;
 			
-			var layers 	= eval ("(" + items["design"][index][postion] + ")");			
+			var layers 	= eval ("(" + items["design"][index][postion] + ")");	
+					
 			var count = Object.keys(layers).length;
 				count = parseInt(count) - 1;
 			var z = layers[1].zIndex;
@@ -4732,14 +4738,18 @@ var design={
 				obj[j] = layers[i];
 				j++;
 			}
+			canvasLoad(obj, 1);
 			canvasLoad(obj, 0);
 			function canvasLoad(obj, i)
 			{
+				//var index = i;
+				//console.log(i);
+				
 				if (typeof obj[i] != 'undefined')
 				{
 					var layer = obj[i];
 					i++;
-					
+					//console.log(layer);
 					if (layer.id != 'area-design')
 					{
 						var imageObj = new Image();
@@ -4748,13 +4758,19 @@ var design={
 						var width 	= design.convert.px(layer.width);
 						var height 	= design.convert.px(layer.height);
 						imageObj.onload = function(){
+							
 							context.save();
 							context.drawImage(imageObj, left, top, width, height);
 							context.restore();
-							canvasLoad(obj, i);
+							if(i>1){
+								canvasLoad(obj, i);
+							}
+							
 						}
 						imageObj.onerror = function(){
-							canvasLoad(obj, i);
+							if(i>1){
+								canvasLoad(obj, i);
+							}
 						}
 						if (jQuery('#'+postion+'-img-'+layer.id).length > 0)
 						{
