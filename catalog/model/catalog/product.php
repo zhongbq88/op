@@ -49,6 +49,7 @@ class ModelCatalogProduct extends Model {
 				'status'           => $query->row['status'],
 				'date_added'       => $query->row['date_added'],
 				'date_modified'    => $query->row['date_modified'],
+				'design_product_id'=> $query->row['design_product_id'],
 				'viewed'           => $query->row['viewed']
 			);
 		} else {
@@ -401,7 +402,7 @@ class ModelCatalogProduct extends Model {
 		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "product_to_layout WHERE product_id = '" . (int)$product_id . "' AND store_id = '" . (int)$this->config->get('config_store_id') . "'");
 
 		if ($query->num_rows) {
-			return $query->row['layout_id'];
+			return (int)$query->row['layout_id'];
 		} else {
 			return 0;
 		}

@@ -4,7 +4,7 @@ class Template {
 
   	public function __construct($adaptor) {
 	    $class = 'Template\\' . $adaptor;
-
+		
 		if (class_exists($class)) {
 			$this->adaptor = new $class();
 		} else {
@@ -16,7 +16,9 @@ class Template {
 		$this->adaptor->set($key, $value);
 	}
 
-	public function render($template) {
-		return $this->adaptor->render($template);
+	public function render($template, $registry, $cache = false) {
+		$this->adaptor->set('registry', $registry);
+		$template_name = $registry->get('config')->get('theme_' . $registry->get('config')->get('config_theme') . '_directory');
+		return $this->adaptor->render($template, false, $template_name);
 	}
 }

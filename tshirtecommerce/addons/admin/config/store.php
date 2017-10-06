@@ -175,17 +175,10 @@ function reloadData(e)
 	mask.show();
 	var btn = jQuery(e).button('loading');
 	jQuery.ajax({
-		url: "<?php echo str_replace('tshirtecommerce/', 'wp-admin/admin-ajax.php?action=tshirt_store_import_all&type=art', site_url('', false)); ?>",
-		type: "GET",
+		url: "<?php echo site_url('', false).'opencart/store.php'; ?>",
 		complete: function(data) {
-			jQuery.ajax({
-				url: "<?php echo str_replace('tshirtecommerce/', 'wp-admin/admin-ajax.php?action=tshirt_store_import_all&type=idea', site_url('', false)); ?>",
-				type: "GET",
-				complete: function(data) {
-					btn.button('reset');
-					mask.hide('slow');
-				}
-			});
+			btn.button('reset');
+			mask.hide('slow');
 		}
 	});
 }

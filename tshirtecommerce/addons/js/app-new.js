@@ -186,6 +186,11 @@ jQuery(document).on('select.item.design', function(event, e){
 		width  = width / zoom;
 		height = height / zoom;
 	}
+	if(typeof design.mobile != 'undefined' && typeof design.mobile.zoom != 'undefined')
+	{
+		width  = width / design.mobile.zoom;
+		height = height / design.mobile.zoom;
+	}
 	width = width.toFixed(1);
 	height = height.toFixed(1);
 	jQuery('.labView.active .mask-item .item-info').html(width +' x '+ height);
@@ -243,8 +248,15 @@ jQuery(document).on('select.item.design', function(event, e){
 			if(jQuery(e).data('type') == 'clipart')
 			{
 				var file = jQuery(e).data('file');
-				if(file.type == 'image')
-				{	
+				if(file.type == 'image' || jQuery(e).find('image').length > 0)
+				{
+					if(typeof file.type == 'undefined')
+					{
+						file = {
+							'type': 'image',
+						};
+						jQuery(e).data('file', file);
+					}
 					var imgSvg = design.item.get().find('svg');
 					var gEle   = jQuery(imgSvg[0]).find('g');
 					flipFlg    = true;
@@ -271,6 +283,11 @@ jQuery(document).on('select.item.design', function(event, e){
 			{
 				width  = width / zoom;
 				height = height / zoom;
+			}
+			if(typeof design.mobile != 'undefined' && typeof design.mobile.zoom != 'undefined')
+			{
+				width  = width / design.mobile.zoom;
+				height = height / design.mobile.zoom;
 			}
 			width = width.toFixed(1);
 			height = height.toFixed(1);
@@ -373,7 +390,7 @@ jQuery(document).on('select.item.design', function(event, e){
 		item.rotatable({
 			angle: deg, 
 			rotate: function(event, angle){
-				var deg = parseInt(angle.r);
+				var deg = Math.round(angle.r);
 				if(deg < 0) deg = 360 + deg;
 				jQuery('#' + type + '-rotate-value').val(deg);
 				jQuery(e).data('rotate', deg);
@@ -411,6 +428,11 @@ jQuery(document).on('select.item.design', function(event, e){
 		{
 			newH = txtH;
 		}
+		if(typeof design.mobile != 'undefined' && typeof design.mobile.zoom != 'undefined')
+		{
+			newW  = width / design.mobile.zoom;
+			newH = height / design.mobile.zoom;
+		}
 		itemWidthVal.val(newW);
 		itemHeightVal.val(newH);
 		jQuery('.labView.active .mask-item .item-info').html(newW +' x '+ newH);
@@ -434,6 +456,11 @@ jQuery(document).on('select.item.design', function(event, e){
 		else
 		{
 			newW = txtW;
+		}
+		if(typeof design.mobile != 'undefined' && typeof design.mobile.zoom != 'undefined')
+		{
+			newW  = width / design.mobile.zoom;
+			newH = height / design.mobile.zoom;
 		}
 		itemWidthVal.val(newW);
 		itemHeightVal.val(newH);
@@ -530,10 +557,16 @@ jQuery(document).on('ini.design', function(event){
 
 jQuery(document).on('beforechangefont.item.design', function(width, height) {
 	var item   = design.item.get();
+	if(item.length == 0) return false;
 	var id     = jQuery('.labView.active').attr('id');
 	var view   = id.replace('view-', '');
 	var width  = (parseInt(item.css('width').replace('px', '')) * sizesCn[view]).toFixed(1);
 	var height = (parseInt(item.css('height').replace('px', '')) * sizesCn[view]).toFixed(1);
+	if(typeof design.mobile != 'undefined' && typeof design.mobile.zoom != 'undefined')
+	{
+		width  = width / design.mobile.zoom;
+		height = height / design.mobile.zoom;
+	}
 	jQuery('.labView.active .mask-item .item-info').html(width +' x '+ height);
 	jQuery('#text-width').val(width);
 	jQuery('#text-height').val(height);
@@ -576,3 +609,12 @@ design.text.sizeFontTxt = function() {
 	box[0]   = (txt[0].getBoundingClientRect().left - svg[0].getBoundingClientRect().left) * zoom;
 	svg[0].setAttributeNS(null, 'viewBox', box.join(' '));
 };
+/*disable copy, save clipart*/
+jQuery(document).ready(function () {
+    jQuery("#dg-cliparts").on("contextmenu",function(e){
+        return false;
+    });
+	jQuery('#dg-cliparts').bind('cut copy paste', function (e) {
+        e.preventDefault();
+    });
+});

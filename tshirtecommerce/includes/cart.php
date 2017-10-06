@@ -257,7 +257,7 @@ class dgCart{
 					{						
 						foreach($fields[$i] as $j=>$value)
 						{
-							if ($value == '') continue;
+							if ($value === '') continue;
 							if (isset($prices[$i][$value]))
 							{
 								$price = $this->priceFormart($prices[$i][$value]);
@@ -311,10 +311,14 @@ class dgCart{
 			if (isset($design->price))
 			{
 				$color_price		= $design->price;
-				if( $color_hex[key($post['colors'])] == $post['colors'][key($post['colors'])])
+				/*if( $color_hex[key($post['colors'])] == $post['colors'][key($post['colors'])])
 					$data->price->colors = $color_price[key($post['colors'])];
 				else
-					$data->price->colors = 0;
+					$data->price->colors = 0;*/
+				foreach($color_hex as $keyvl=>$hexvl) {
+					if( $color_hex[$keyvl] == $post['colors'][key($post['colors'])])
+						$data->price->colors = $color_price[$keyvl];
+				}
 			}
 			else
 			{

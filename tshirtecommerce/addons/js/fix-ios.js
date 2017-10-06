@@ -8,7 +8,7 @@ function IOSFont(e)
 	canvas.height 	= 500;
 	var context	 	= canvas.getContext('2d');
 	
-	var mySrc = 'data:image/svg+xml;base64,'+btoa(encodeURIComponent(html));
+	var mySrc = 'data:image/svg+xml;base64,'+btoa(unescape(encodeURIComponent(html)));
 	var images 	= new Image();
 	images.onload = function() {
 		context.drawImage(images, 0, 0);		

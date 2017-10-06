@@ -3,10 +3,7 @@ $settings = $GLOBALS['settings'];
 $addons = $GLOBALS['addons'];
 ?>
 <div class="col-left">
-	<div class="text-center product-btn-info">		
-		<a href="#none" <?php echo cssShow($settings, 'show_product_info'); ?> data-target="#modal-product-info" data-toggle="modal" class="btn btn-default pull-left btn-sm"><i class="fa fa-info"></i> <span><?php echo lang('design_product_info'); ?></span></a>
-		<a href="#none" <?php echo cssShow($settings, 'show_product_size'); ?> data-target="#modal-product-size" data-toggle="modal" class="btn btn-default pull-right btn-sm"><i class="fa fa-male"></i> <span><?php echo lang('design_size_chart'); ?></span></a>
-	</div>
+
 	
 	<div id="dg-left" class="width-100">
 		<div class="dg-box width-100">

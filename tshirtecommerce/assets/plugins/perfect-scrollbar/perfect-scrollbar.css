@@ -7,3 +7,4 @@
 .ps-container .ps-scrollbar-x-rail.in-scrolling,.ps-container .ps-scrollbar-y-rail.in-scrolling{opacity:0.9;filter:alpha(opacity=90)}
 .ps-container.ie6 .ps-scrollbar-x,.ps-container.ie .ps-scrollbar-y{font-size:0}
 .ps-container .ps-scrollbar-x-rail:hover .ps-scrollbar-x,.ps-container .ps-scrollbar-x-rail.hover .ps-scrollbar-x,.ps-container .ps-scrollbar-y-rail:hover .ps-scrollbar-y,.ps-container .ps-scrollbar-y-rail.hover .ps-scrollbar-y{background-color:#999}
+.ps-scrollbar-y-rail{opacity: 1 !important;}

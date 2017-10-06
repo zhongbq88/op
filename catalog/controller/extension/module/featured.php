@@ -1,26 +1,7 @@
 <?php
 class ControllerExtensionModuleFeatured extends Controller {
 	public function index($setting) {
-
-		// pavo version 2.2
-		$this->load->language('extension/module/themecontrol');
-		$data['objlang'] = $this->registry->get('language');
-		$data['ourl'] = $this->registry->get('url');
-
-		$config = $this->registry->get("config");
-		$data['sconfig'] = $config;
-		$data['themename'] = $config->get("theme_default_directory");
-		// end edit
-
 		$this->load->language('extension/module/featured');
-
-		$data['heading_title'] = $this->language->get('heading_title');
-
-		$data['text_tax'] = $this->language->get('text_tax');
-
-		$data['button_cart'] = $this->language->get('button_cart');
-		$data['button_wishlist'] = $this->language->get('button_wishlist');
-		$data['button_compare'] = $this->language->get('button_compare');
 
 		$this->load->model('catalog/product');
 
@@ -68,17 +49,21 @@ class ControllerExtensionModuleFeatured extends Controller {
 					} else {
 						$rating = false;
 					}
-
+					$href = $this->url->link('product/product', 'product_id=' . $product_info['product_id']);
+					//echo $product_info['design_product_id'];
+					if(isset($product_info['design_product_id'])&&$product_info['design_product_id']>0){
+						$href = $this->url->link('tshirtecommerce/designer', 'parent_id=' . $product_info['product_id'].'&product_id='.$product_info['design_product_id']);
+					}
 					$data['products'][] = array(
 						'product_id'  => $product_info['product_id'],
 						'thumb'       => $image,
 						'name'        => $product_info['name'],
-						'description' => utf8_substr(strip_tags(html_entity_decode($product_info['description'], ENT_QUOTES, 'UTF-8')), 0, $this->config->get($this->config->get('config_theme') . '_product_description_length')) . '..',
+						'description' => utf8_substr(strip_tags(html_entity_decode($product_info['description'], ENT_QUOTES, 'UTF-8')), 0, $this->config->get('theme_' . $this->config->get('config_theme') . '_product_description_length')) . '..',
 						'price'       => $price,
 						'special'     => $special,
 						'tax'         => $tax,
 						'rating'      => $rating,
-						'href'        => $this->url->link('product/product', 'product_id=' . $product_info['product_id'])
+						'href'        => $href
 					);
 				}
 			}

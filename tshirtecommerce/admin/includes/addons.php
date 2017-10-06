@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /**
  * @author tshirtecommerce - www.tshirtecommerce.com
  * @date: 2015-01-10

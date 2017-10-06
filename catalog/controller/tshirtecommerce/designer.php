@@ -1,9 +1,9 @@
 ﻿<?php
 /**
  * @author 		tshirtecommerce - https://tshirtecommerce.com
- * @date 		March 15, 2016
+ * @date 		September 13, 2017
  * 
- * API 			4.1.5
+ * API 			4.2.0
  * 
  * @copyright  	Copyright (C) 2015 https://tshirtecommerce.com. All rights reserved.
  * @license    	GNU General Public License version 2 or later; see LICENSE
@@ -16,6 +16,10 @@ class ControllerTshirtecommerceDesigner extends Controller {
 
 	public function index()
 	{
+		$this->load->language('extension/module/tshirtecommerce');
+		$this->load->model('tshirtecommerce/order');
+		$this->load->model('setting/store');
+
 		$data = array();
 		$check = false;
 
@@ -25,13 +29,8 @@ class ControllerTshirtecommerceDesigner extends Controller {
 		} else {
 			$data['tshirtecommerce_logo_loading'] = 'tshirtecommerce/assets/images/logo-loading.png';
 		}
-		$tshirtecommerce_text_loading = $this->config->get('tshirtecommerce_text_loading');
-		if (null !== $tshirtecommerce_text_loading) {
-			$data['tshirtecommerce_text_loading'] = $tshirtecommerce_text_loading;
-		} else {
-			$data['tshirtecommerce_text_loading'] = 'The Design Tool is Loading...';
-		}
-
+		$data['tshirtecommerce_text_loading'] = $this->language->get('tshirtecommerce_text_loading');
+		
 		if (isset($this->request->get['color'])) $color = $this->request->get['color'];
 		if (isset($this->request->get['cart_id'])) $cart_id = $this->request->get['cart_id'];
 		if (isset($this->request->get['edit'])) $edit = $this->request->get['edit'];
@@ -46,7 +45,6 @@ class ControllerTshirtecommerceDesigner extends Controller {
 		} else {
 			$product_id = $this->config->get('tshirtecommerce_product');
 			if ($product_id) {
-				$this->load->model('tshirtecommerce/order');
 				$product = $this->model_tshirtecommerce_order->getProduct((int)$product_id);
 				if ($product !== false) {
 					$check = true;
@@ -56,12 +54,29 @@ class ControllerTshirtecommerceDesigner extends Controller {
 			}			
 		}
 
-		if ($check == true) {
-			$url = (isset($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] == "on" || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https')) ? HTTPS_SERVER : HTTP_SERVER;
-			$data['url'] = $url;
+		if ($this->request->server['HTTPS']) {
+			$url = $this->config->get('config_ssl');
+		} else {
+			$url = $this->config->get('config_url');
+		}
+		// For mutiple store
+		$this->load->model('setting/store');
+		$stores = $this->model_setting_store->getStores();
+		if (count($stores) > 1) {
+			$store_id = $this->config->get('config_store_id');
+			foreach ($stores as $store) {
+				if ($store_id == $store['store_id']) {
+					$url = $this->request->server['HTTPS'] ? $store['ssl'] : $store['url'];
+					break;
+				}
+			}
+		}
+		$data['url'] = $url;
+
+		$checkproduct = $this->model_tshirtecommerce_order->checkProductDesign($parent_id, $product_id);
+		if ($check == true && $checkproduct == true) {
 			$params = explode(':', $product_id);
 			$view = '<div class="row-designer"></div>';
-			$this->load->model('setting/store');
 			$ocstore = $this->model_setting_store->getStores();
 			$id_store_current = $this->config->get('config_store_id');
 			if ($id_store_current > 0 && count($ocstore) > 0) {
@@ -97,7 +112,7 @@ class ControllerTshirtecommerceDesigner extends Controller {
 
 			$data['edit'] = isset($edit) ? $edit : 0;
 		} else {
-			$view = 'Product Not Found.';
+			$view = $this->language->get('text_product_not_found');	// Fixed #32805
 		}
 		
 		$file = dirname(DIR_SYSTEM).'/tshirtecommerce/data/settings.json';
@@ -108,7 +123,7 @@ class ControllerTshirtecommerceDesigner extends Controller {
 			if (isset($setting->site_name)) $this->document->setDescription($setting->meta_description);
 			if (isset($setting->site_name)) $this->document->setKeywords($setting->meta_keywords);			
 		}
-		//echo $view;
+		
 		$data['content'] = $view;
 		$data['column_left'] = $this->load->controller('common/column_left');
 		$data['column_right'] = $this->load->controller('common/column_right');

@@ -1,9 +1,9 @@
 <?php
 /**
  * @author tshirtecommerce - www.tshirtecommerce.com
- * @date: 2015-01-10
+ * @date 	Aug 31, 2017
  * 
- * API
+ * API 		@since 4.2.0 -- Opencart platform
  * 
  * @copyright  Copyright (C) 2015 tshirtecommerce.com. All rights reserved.
  * @license    GNU General Public License version 2 or later; see LICENSE
@@ -29,11 +29,27 @@ if ( empty($_GET['key']) || empty($_GET['view']) )
 	echo 'Directory access is forbidden'; exit;
 }
 
-// check is download
+// check is download -- @deprecated
 //if (!isset($_SESSION['download_design']))
 //{
 //	echo 'Directory access is forbidden'; exit;
 //}
+
+// only for opencart -- check SSL for url
+include_once dirname(dirname(__FILE__)).'/config.php';
+$opencart_ssl = false;
+if ((isset($_SERVER['HTTPS']) && (($_SERVER['HTTPS'] == 'on') || ($_SERVER['HTTPS'] == '1'))) || $_SERVER['SERVER_PORT'] == 443) {
+	$opencart_ssl = true;
+} elseif (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https' || !empty($_SERVER['HTTP_X_FORWARDED_SSL']) && $_SERVER['HTTP_X_FORWARDED_SSL'] == 'on') {
+	$opencart_ssl = true;
+} else {
+	$opencart_ssl = false;
+}
+$opencart_site_link = $opencart_ssl ? HTTPS_SERVER : HTTP_SERVER;
+
+include_once dirname(dirname(__FILE__)).'/system/library/url.php';
+$oUrl = new Url($opencart_site_link, $opencart_ssl);
+$opencart_ajax_link = $oUrl->link('tshirtecommerce/store/store_payment_art', '', true);
 
 function openURL($url)
 {
@@ -43,6 +59,8 @@ function openURL($url)
 		$ch = curl_init();
 		curl_setopt($ch, CURLOPT_URL, $url);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+		curl_setopt($ch, CURLOPT_VERBOSE, 1);
+      	curl_setopt($ch, CURLOPT_USERAGENT, 'User-Agent: curl/7.39.0');
 		$data = curl_exec($ch);
 		curl_close($ch);
 	}
@@ -101,6 +119,7 @@ $payment = false;
 				$key = $_GET['key'];
 				$position = $_GET['view'];
 				$is_admin = 0;
+				$is_campaign = isset($_GET['campaign']) ? $_GET['campaign'] : '';
 				
 				include_once ROOT .DS. 'includes' .DS. 'functions.php';				
 				
@@ -131,9 +150,8 @@ $payment = false;
 				else
 				{
 					$file 		= 'download_idea.php';
-					if(strpos($key, 'cart:') !== false)
+					if(strpos($key, 'cart:') !== false || !empty($is_campaign))
 					{
-						
 						$key		= str_replace('cart:', '', $key);
 						$cache 		= $dg->cache('cart');
 						$params 	= explode(':', $key);
@@ -334,17 +352,17 @@ $payment = false;
 					<img src="<?php echo $data['image']; ?>" class="img-responsive" alt="Responsive image">
 					<?php } ?>
 					<span style="display:none;" id="download-png">
-					<?php echo openURL($file.'?key='.$_GET['key'].'&view='.$position.'&type=png&is_admin='.$is_admin); ?>
+					<?php echo openURL($file.'?key='.$_GET['key'].'&view='.$position.'&type=png&is_admin='.$is_admin.(!empty($is_campaign) ? '&campaign=1' : '')); ?>
 					</span>
 					
 					<?php
 					if($payment == false)
 					{
-						$download_pdf = openURL($file.'?key='.$_GET['key'].'&view='.$position.'&type=pdf&is_admin='.$is_admin);
+						$download_pdf = openURL($file.'?key='.$_GET['key'].'&view='.$position.'&type=pdf&is_admin='.$is_admin.(!empty($is_campaign) ? '&campaign=1' : ''));
 					?>
 					<hr />
 					<center>Click to download: 						
-						<a href="<?php echo $file.'?key='.$_GET['key'].'&view='.$position.'&type=svg&download=1&is_admin='.$is_admin; ?>"><strong>SVG</strong></a>
+						<a href="<?php echo $file.'?key='.$_GET['key'].'&view='.$position.'&type=svg&download=1&is_admin='.$is_admin.(!empty($is_campaign) ? '&campaign=1' : ''); ?>"><strong>SVG</strong></a>
 						 or 
 						<a href="#" onclick="window.print();"><strong>PDF</strong></a>						
 						 or 
@@ -437,7 +455,8 @@ $payment = false;
 									if ($item['type'] == 'text')
 									{
 										$font = $item['fontFamily'];
-										echo "<link href='https://fonts.googleapis.com/css?family=".str_replace(' ', '+', $font)."' rel='stylesheet' type='text/css'>";
+										if ($font != 'arial')
+											echo "<link href='https://fonts.googleapis.com/css?family=".str_replace(' ', '+', $font)."' rel='stylesheet' type='text/css'>";
 										echo '<p><strong>Add text:</strong></p>';
 										
 										if(strpos($item['svg'], '<tspan dy="0" x="50%"></tspan>') > 0)
@@ -654,6 +673,7 @@ $payment = false;
 			}
 			var g = svg.children('g')[0];
 			var transform = g.getAttribute('transform');
+			if(typeof g == 'undefined') return;
 			if(transform != null)
 			{
 				if(transform.indexOf('scale(-1,1)') != -1)
@@ -666,6 +686,49 @@ $payment = false;
 		}
 	}
 
+	function HexToRGB(Hex) {
+
+		var Long = parseInt(Hex, 16);
+		return {
+			R: (Long >>> 16) & 0xff,
+			G: (Long >>> 8) & 0xff,
+			B: Long & 0xff
+		};
+	}
+
+	function changeImgColor(src, color, e) {
+
+		var canvas = document.createElement("canvas");
+		var ctx = canvas.getContext("2d");
+		var originalPixels = null;
+		var currentPixels = null;
+		
+		var img = new Image();				
+		img.onload = function() {
+			canvas.width = img.width;
+			canvas.height = img.height;
+		
+			ctx.drawImage(img, 0, 0, img.naturalWidth, img.naturalHeight, 0, 0, img.width, img.height);
+			originalPixels = ctx.getImageData(0, 0, img.width, img.height);
+			currentPixels = ctx.getImageData(0, 0, img.width, img.height);
+					
+		        var newColor = HexToRGB(color);
+
+		        for (var I = 0, L = originalPixels.data.length; I < L; I += 4) {
+		            if (currentPixels.data[I + 3] > 0) {
+		                currentPixels.data[I] = newColor.R;
+		                currentPixels.data[I + 1] = newColor.G;
+		                currentPixels.data[I + 2] = newColor.B;
+		            }
+		        }
+
+		        ctx.putImageData(currentPixels, 0, 0);
+		       // e.src = canvas.toDataURL("image/png");
+		       jQuery(e).attr('xlink:href', canvas.toDataURL("image/png"));
+		};
+		img.src = src;
+	}
+
 	jQuery(document).ready(function() {
 		var svgPdf  = jQuery('#download-pdf').children('svg')[0];
 		var svgPng  = jQuery('#download-png').children('svg')[0];
@@ -676,6 +739,12 @@ $payment = false;
 		});
 		jQuery(svgPng).find('svg').each(function() {
 			changeShapView(jQuery(this), pngZoom, 'png');
+		});
+
+		jQuery('.set-colors').each(function(){
+			var color = jQuery(this).data('color');
+			var src = jQuery(this).attr('xlink:href');
+			changeImgColor(src, color, this);
 		});
 	});
 	</script>
@@ -701,7 +770,7 @@ $payment = false;
 			<h3 class="mask-status">Creating File Output...</h3>
 			
 			<script type="text/javascript">
-				var url = '<?php echo $dg->url().'tshirtecommerce/opencart/ajax.php'; ?>?action=store_payment_art';
+				var url = '<?php echo $opencart_ajax_link; ?>';
 				var data = {};
 				data.e_order_id = '<?php echo $_GET['e_order_id']; ?>';
 				data.params 	= '<?php echo $_GET['params']; ?>';
@@ -718,9 +787,9 @@ $payment = false;
 		
 		<?php }else{ ?>
 			<h3 class="mask-status">Creating File Output...</h3>
-			
 			<script type="text/javascript">
-				var url = '<?php echo $dg->url().'tshirtecommerce/opencart/ajax.php'; ?>?action=store_ajax_key&api_key=<?php echo $api; ?>&arts=<?php echo $str_ids; ?>&order_id=<?php echo $design_id; ?>';
+				<?php $opencart_store_ajax_key_link = $oUrl->link('tshirtecommerce/store/store_ajax_key', 'api_key='.$api.'&arts'.$str_ids.'&order_id'.$design_id, true); ?>
+				var url = <?php echo $opencart_store_ajax_key_link ?>;
 				jQuery.ajax({
 					url: url,
 				}).done(function(response) {

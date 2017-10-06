@@ -341,7 +341,7 @@ design.products.changeDesign = function(e) {
 		jQuery('#modal-product-info .product-detail-short_description').html(product.short_description);
 		jQuery('.product-detail-size').html(product.size);
 
-		jQuery('#oc_tool_cart').remove();
+		/*jQuery('#oc_tool_cart').remove();
 		jQuery.ajax({
 			type: "POST",
 			dataType: "html",
@@ -351,7 +351,7 @@ design.products.changeDesign = function(e) {
 			jQuery('#product-details').append(res_html);
 			jQuery(e).button('reset');
 		});
-		
+		*/
 		design.ajax.getPrice();
 	});
 };
@@ -569,7 +569,7 @@ design.saveadmin = function(check) {
 };
 
 jQuery(document).on('ini.design', function(event) {
-	url_ajax_product = 'index.php?route=tshirtecommerce/designer/ajax';
+	/*url_ajax_product = 'index.php?route=tshirtecommerce/designer/ajax';
 
 	jQuery.ajax({
 		type: "POST",
@@ -580,7 +580,7 @@ jQuery(document).on('ini.design', function(event) {
 		if (data != '') {
 			jQuery('#product-details').append(data);
 		}
-	});
+	});*/
 });
 
 jQuery(document).on('form.addtocart.design', function(event, datas) {

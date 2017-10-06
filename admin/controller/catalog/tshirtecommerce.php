@@ -1,9 +1,9 @@
 <?php
 /**
  * @author 		tshirtecommerce - https://tshirtecommerce.com
- * @date 		January 17, 2017
+ * @date 		September 13, 2017
  * 
- * API 			4.1.3
+ * API 			4.2.0
  * 
  * @copyright  	Copyright (C) 2015 https://tshirtecommerce.com. All rights reserved.
  * @license    	GNU General Public License version 2 or later; see LICENSE
@@ -15,7 +15,7 @@ class ControllerCatalogTshirtecommerce extends Controller {
 	
     public function index()
     {
-		$this->load->language('module/tshirtecommerce');
+		$this->load->language('extension/module/tshirtecommerce');
 		$this->document->setTitle($this->language->get('heading_title'));
 		
 		// get language
@@ -24,28 +24,18 @@ class ControllerCatalogTshirtecommerce extends Controller {
 		$data['breadcrumbs']   = array();
 		$data['breadcrumbs'][] = array(
 			'text' => $this->language->get('text_home'),
-			'href' => $this->url->link('common/dashboard', 'token='.$this->session->data['token'], true)
+			'href' => $this->url->link('common/dashboard', 'user_token='.$this->session->data['user_token'], true)
 		);
 		
 		$data['breadcrumbs'][] = array(
 			'text' => $this->language->get('heading_title'),
-			'href' => $this->url->link('catalog/tshirtecommerce/index', 'token='.$this->session->data['token'], true)
+			'href' => $this->url->link('catalog/tshirtecommerce/index', 'user_token='.$this->session->data['user_token'], true)
 		);
 	
-		$dir_admins = explode('/', DIR_APPLICATION);
-		$dir_admin = empty($dir_admins[count($dir_admins) - 1]) ? $dir_admins[count($dir_admins) - 2] : $dir_admins[count($dir_admins) - 1];
-		if (isset($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] == "on" || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https')) {
-			if (strpos(HTTPS_SERVER, '/'.$dir_admin.'/') !== false) {
-				$url = str_replace('/'.$dir_admin.'/', '', HTTPS_SERVER).'/tshirtecommerce/admin/index.php';
-			} else {
-				$url = str_replace($dir_admin, '', HTTPS_SERVER).'/tshirtecommerce/admin/index.php';
-			}
+		if ($this->request->server['HTTPS']) {
+			$url = HTTPS_CATALOG.'/tshirtecommerce/admin/index.php';
 		} else {
-			if (strpos(HTTP_SERVER, '/'.$dir_admin.'/') !== false) {
-				$url = str_replace('/'.$dir_admin.'/', '', HTTP_SERVER).'/tshirtecommerce/admin/index.php';
-			} else {
-				$url = str_replace($dir_admin, '', HTTP_SERVER).'/tshirtecommerce/admin/index.php';
-			}		
+			$url = HTTP_CATALOG.'/tshirtecommerce/admin/index.php';
 		}
 
 		$data['url'] = $url;
@@ -64,27 +54,14 @@ class ControllerCatalogTshirtecommerce extends Controller {
 
 		$_SESSION['is_admin'] = $is_admin;
 		$this->session->data['is_admin'] = $is_admin;
-
-		// write session to file
-		$sess_json = json_encode($is_admin);
-		$sess_file = dirname(DIR_SYSTEM).'/tshirtecommerce/admin/tmp/session_'.session_id();
-		$this->write_to_file($sess_json, $sess_file);
-		$data['url'] .= '?session_id='.session_id();
 		
 		$this->response->setOutput($this->load->view('catalog/tshirtecommerce', $data));
     }
 	
-	protected function write_to_file($text,$new_filename)
-	{
-		$fp = @fopen($new_filename, 'w');
-		@fwrite($fp, $text);
-		@fclose($fp);
-	}
-	
 	// check update
 	public function update()
 	{
-		$this->load->language('module/tshirtecommerce');
+		$this->load->language('extension/module/tshirtecommerce');
 		$this->document->setTitle($this->language->get('heading_title'));
 		
 		$this->load->model('setting/setting');
@@ -150,10 +127,23 @@ class ControllerCatalogTshirtecommerce extends Controller {
 			$versions = json_decode($content);
 			if (count($versions)) $data['versions'] = $versions;
 		}
+
+		// load update content
+		$file = 'http://updates.tshirtecommerce.com/opencart/updates.json';
+		$content = $this->openURL($file);
+		if ($content !== false) {
+			$versions = json_decode($content);
+			if (count($versions)) {
+				foreach ($versions as &$v) {
+					$v->info = $this->openURL('http://updates.tshirtecommerce.com/opencart/'.$v->info);
+				}
+				$data['versions'] = $versions;
+			}
+		}
 		
 		$data['code'] = $code;
 		$data['oc_version'] = $oc_version;
-		$data['link'] = $this->url->link('catalog/tshirtecommerce/update', 'token='.$this->session->data['token'], true);
+		$data['link'] = $this->url->link('catalog/tshirtecommerce/update', 'user_token='.$this->session->data['user_token'], true);
 		$data['breadcrumbs'][] = array(
 			'text' => $this->language->get('heading_title'),
 			'href' => $data['link']
@@ -170,64 +160,61 @@ class ControllerCatalogTshirtecommerce extends Controller {
 		}
 
 		if (empty($code) || str_replace(' ', '', $code) == '' || count($data['tshirtecommerce_verify']) == 0 || $data['tshirtecommerce_verify']['error'] == 1) {
-			$data['error_warning'] = 'Please enter your Purchase codes before update or download new version. Click <a style="font-weight:bold;" href="'.$this->url->link('module/tshirtecommerce', 'token='.$this->session->data['token'], true).'">here</a> to setting';
+			$data['error_warning'] = 'Please enter your Purchase codes before update or download new version. Click <a style="font-weight:bold;" href="'.$this->url->link('extension/module/tshirtecommerce', 'user_token='.$this->session->data['user_token'], true).'">here</a> to setting';
 		}
 		
 		$this->response->setOutput($this->load->view('catalog/tshirtecommerce_update', $data));		
 	}
-
-	public function help()
-	{
-		$this->load->language('module/tshirtecommerce');
-		$this->document->setTitle($this->language->get('heading_title'));
-		$this->load->model('setting/setting');
-
-		// load language
-		$data['updata_head'] = 'Helps';
-		$data['link'] = $this->url->link('catalog/tshirtecommerce/help', 'token='.$this->session->data['token'], true);
-		$data['breadcrumbs'][] = array(
-			'text' => $this->language->get('heading_title'),
-			'href' => $data['link']
-		);
-		$data['header'] = $this->load->controller('common/header');
-		$data['column_left'] = $this->load->controller('common/column_left');
-		$data['footer'] = $this->load->controller('common/footer');
-
-		$this->response->setOutput($this->load->view('catalog/tshirtecommerce_help', $data));		
-	}
 	
-	private function openURL($url)
-	{		
-		if (ini_get('allow_url_fopen')) {
-			$data = @file_get_contents($url);
-			if ($data == false) return false;
-		} else {		
-			$ch = @curl_init();
-			curl_setopt($ch, CURLOPT_URL, $url);
-			curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-			$data = @curl_exec($ch);
-			@curl_close($ch);
-		}
+	protected function fnStrtolower($str)
+	{
+		if (is_array($str)) {
+	            return false;
+	        }
+	        if (function_exists('mb_strtolower')) {
+	            return mb_strtolower($str, 'utf-8');
+	        }
+	        return strtolower($str);
+	}
 
-		return $data;
+	protected function openURL($url, $use_include_path = false, $stream_context = null, $curl_timeout = 5)
+	{
+	    if ($stream_context == null && preg_match('/^https?:\/\//', $url)) {
+	        $stream_context = @stream_context_create(array('http' => array('timeout' => $curl_timeout)));
+	    }
+	    if (in_array(ini_get('allow_url_fopen'), array('On', 'on', '1')) || !preg_match('/^https?:\/\//', $url)) {
+	        return @file_get_contents($url, $use_include_path, $stream_context);
+	    } elseif (function_exists('curl_init')) {
+	        $curl = curl_init();
+	        curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+	        curl_setopt($curl, CURLOPT_URL, $url);
+	        curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 5);
+	        curl_setopt($curl, CURLOPT_TIMEOUT, $curl_timeout);
+	        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, 0);
+	        if ($stream_context != null) {
+	            $opts = stream_context_get_options($stream_context);
+	            if (isset($opts['http']['method']) && $this->fnStrtolower($opts['http']['method']) == 'post') {
+	                curl_setopt($curl, CURLOPT_POST, true);
+	                if (isset($opts['http']['content'])) {
+	                    parse_str($opts['http']['content']);
+	                    curl_setopt($curl, CURLOPT_POSTFIELDS, array());
+	                }
+	            }
+	        }
+	        $content = curl_exec($curl);
+	        curl_close($curl);
+	        return $content;
+	    } else {
+	        return false;
+	    }
 	}
 	
 	public function ajax()
 	{
-		$dir_admins = explode('/', DIR_APPLICATION);
-		$dir_admin = empty($dir_admins[count($dir_admins) - 1]) ? $dir_admins[count($dir_admins) - 2] : $dir_admins[count($dir_admins) - 1];
-		if (isset($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] == "on" || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https')) {
-			if (strpos(HTTPS_SERVER, '/'.$dir_admin.'/') !== false) {
-				$url = str_replace('/'.$dir_admin.'/', '', HTTPS_SERVER).'/tshirtecommerce/admin.php?key=123';
-			} else {
-				$url = str_replace($dir_admin, '', HTTPS_SERVER).'/tshirtecommerce/admin.php?key=123';
-			}
+		if ($this->request->server['HTTPS']) {
+			$url = HTTPS_CATALOG.'/tshirtecommerce/admin.php?key=123';
 		} else {
-			if (strpos(HTTP_SERVER, '/'.$dir_admin.'/') !== false) {
-				$url = str_replace('/'.$dir_admin.'/', '', HTTP_SERVER).'/tshirtecommerce/admin.php?key=123';
-			} else {
-				$url = str_replace($dir_admin, '', HTTP_SERVER).'/tshirtecommerce/admin.php?key=123';
-			}
+			$url = HTTP_CATALOG.'/tshirtecommerce/admin.php?key=123';
 		}
 
 		echo $this->openURL($url);		

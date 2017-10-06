@@ -1,9 +1,9 @@
 <?php
 /**
  * @author 		tshirtecommerce - https://tshirtecommerce.com
- * @date  		June, 16, 2016
+ * @date  		September 13, 2017
  * 
- * API 			4.1.3
+ * API 			4.2.0
  * 
  * @copyright  	Copyright (C) 2015 https://tshirtecommerce.com. All rights reserved.
  * @license    	GNU General Public License version 2 or later; see LICENSE

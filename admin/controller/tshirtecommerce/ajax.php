@@ -1,6 +1,6 @@
 <?php 
 
-// Since version 4.1.5
+// Since version 4.2.0
 // For admin ajax
 // - Quick setup
 
@@ -83,7 +83,7 @@ class ControllerTshirtecommerceAjax extends Controller
 			$settings->store->enable 		= 1;
 
 			$url 	= 'http://api.9file.net/api/key/api_key/'.$settings->store->api;     
-            $info 	= json_decode($this->file_get_contents($url));
+            $info 	= json_decode($this->openURL($url));
 
             $settings->store->verified = isset($info->error) ? 0 : 1;
 
@@ -118,7 +118,7 @@ class ControllerTshirtecommerceAjax extends Controller
 		$dg = new dg();
 
 		$file 		= 'http://updates.tshirtecommerce.com/products_import.zip';
-		$packages 	= $this->file_get_contents($file);
+		$packages 	= $this->openURL($file);
 	    $new 		= ROOT.'/products_import'.time().'.zip';
 
 	    if ($packages !== false && @file_put_contents($new, $packages)) {
@@ -223,11 +223,11 @@ class ControllerTshirtecommerceAjax extends Controller
 
 				// Get image from demo
 				$source = $demo->image; // is url
-				$name 	= 'catalog/demo_tshirtecommerce_thumb'.time().'.png';
+				$name 	= 'catalog/demo_tshirtecommerce_thumb'.uniqid(time()).'.png';
 				$dest 	= DIR_IMAGE.'/'.$name;
 				//copy($source, $dest);
-				if ($this->file_get_contents($source) !== false) {
-					@file_put_contents($dest, $this->file_get_contents($source));
+				if ($this->openURL($source) !== false) {
+					@file_put_contents($dest, $this->openURL($source));
 				}
 
 				$data['image'] = $name;
@@ -241,7 +241,7 @@ class ControllerTshirtecommerceAjax extends Controller
 
 								if (isset($temp[1]) && isset($temp[1]['img'])) {
 									$s = dirname(DIR_SYSTEM).'/tshirtecommerce/'.$temp[1]['img'];
-									$n = 'catalog/demo_tshirtecommerce_f'.$k.time().'.png';
+									$n = 'catalog/demo_tshirtecommerce_f'.$k.uniqid(time()).'.png';
 									$d = DIR_IMAGE.'/'.$n;
 									@copy($s, $d);
 									$demo_images[] = $n;
@@ -257,7 +257,7 @@ class ControllerTshirtecommerceAjax extends Controller
 
 								if (isset($temp[1]) && isset($temp[1]['img'])) {
 									$s = dirname(DIR_SYSTEM).'/tshirtecommerce/'.$temp[1]['img'];
-									$n = 'catalog/demo_tshirtecommerce_b'.$k.time().'.png';
+									$n = 'catalog/demo_tshirtecommerce_b'.$k.uniqid(time()).'.png';
 									$d = DIR_IMAGE.'/'.$n;
 									@copy($s, $d);
 									$demo_images[] = $n;
@@ -273,7 +273,7 @@ class ControllerTshirtecommerceAjax extends Controller
 
 								if (isset($temp[1]) && isset($temp[1]['img'])) {
 									$s = dirname(DIR_SYSTEM).'/tshirtecommerce/'.$temp[1]['img'];
-									$n = 'catalog/demo_tshirtecommerce_l'.$k.time().'.png';
+									$n = 'catalog/demo_tshirtecommerce_l'.$k.uniqid(time()).'.png';
 									$d = DIR_IMAGE.'/'.$n;
 									@copy($s, $d);
 									$demo_images[] = $n;
@@ -289,7 +289,7 @@ class ControllerTshirtecommerceAjax extends Controller
 
 								if (isset($temp[1]) && isset($temp[1]['img'])) {
 									$s = dirname(DIR_SYSTEM).'/tshirtecommerce/'.$temp[1]['img'];
-									$n = 'catalog/demo_tshirtecommerce_r'.$k.time().'.png';
+									$n = 'catalog/demo_tshirtecommerce_r'.$k.uniqid(time()).'.png';
 									$d = DIR_IMAGE.'/'.$n;
 									@copy($s, $d);
 									$demo_images[] = $n;
@@ -357,48 +357,48 @@ class ControllerTshirtecommerceAjax extends Controller
         return true;
     }
 
-    protected function file_get_contents($url, $use_include_path = false, $stream_context = null, $curl_timeout = 60, $fallback = false)
-    {
-        if ($stream_context == null && preg_match('/^https?:\/\//', $url)) {
-            $stream_context = @stream_context_create(array('http' => array('timeout' => $curl_timeout)));
-        }
-        if (function_exists('curl_init')) {
-            $curl = curl_init();
-            curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-            curl_setopt($curl, CURLOPT_URL, $url);
-            curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 5);
-            curl_setopt($curl, CURLOPT_TIMEOUT, $curl_timeout);
-            curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, 0);
-            if ($stream_context != null) {
-                $opts = stream_context_get_options($stream_context);
-                if (isset($opts['http']['method']) && Tools::strtolower($opts['http']['method']) == 'post') {
-                    curl_setopt($curl, CURLOPT_POST, true);
-                    if (isset($opts['http']['content'])) {
-                        parse_str($opts['http']['content'], $post_data);
-                        curl_setopt($curl, CURLOPT_POSTFIELDS, $post_data);
-                    }
-                }
-            }
-            $content = curl_exec($curl);
-            curl_close($curl);
-            return $content;
-        } elseif (in_array(ini_get('allow_url_fopen'), array('On', 'on', '1')) || !preg_match('/^https?:\/\//', $url)) {
-            return @file_get_contents($url, $use_include_path, $stream_context);
-        } else {
-            return false;
-        }
-    }
+    protected function fnStrtolower($str)
+	{
+		if (is_array($str)) {
+	            return false;
+	        }
+	        if (function_exists('mb_strtolower')) {
+	            return mb_strtolower($str, 'utf-8');
+	        }
+	        return strtolower($str);
+	}
 
-    protected function strtolower($str)
-    {
-        if (is_array($str)) {
-            return false;
-        }
-        if (function_exists('mb_strtolower')) {
-            return mb_strtolower($str, 'utf-8');
-        }
-        return strtolower($str);
-    }
+	protected function openURL($url, $use_include_path = false, $stream_context = null, $curl_timeout = 5)
+	{
+	    if ($stream_context == null && preg_match('/^https?:\/\//', $url)) {
+	        $stream_context = @stream_context_create(array('http' => array('timeout' => $curl_timeout)));
+	    }
+	    if (in_array(ini_get('allow_url_fopen'), array('On', 'on', '1')) || !preg_match('/^https?:\/\//', $url)) {
+	        return @file_get_contents($url, $use_include_path, $stream_context);
+	    } elseif (function_exists('curl_init')) {
+	        $curl = curl_init();
+	        curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+	        curl_setopt($curl, CURLOPT_URL, $url);
+	        curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 5);
+	        curl_setopt($curl, CURLOPT_TIMEOUT, $curl_timeout);
+	        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, 0);
+	        if ($stream_context != null) {
+	            $opts = stream_context_get_options($stream_context);
+	            if (isset($opts['http']['method']) && $this->fnStrtolower($opts['http']['method']) == 'post') {
+	                curl_setopt($curl, CURLOPT_POST, true);
+	                if (isset($opts['http']['content'])) {
+	                    parse_str($opts['http']['content']);
+	                    curl_setopt($curl, CURLOPT_POSTFIELDS, array());
+	                }
+	            }
+	        }
+	        $content = curl_exec($curl);
+	        curl_close($curl);
+	        return $content;
+	    } else {
+	        return false;
+	    }
+	}
 }
 
 ?>

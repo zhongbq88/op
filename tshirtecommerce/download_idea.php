@@ -10,7 +10,6 @@
  *
  */
 error_reporting(0);
-
 define('ROOT', dirname(__FILE__));
 define('DS', DIRECTORY_SEPARATOR);
 
@@ -24,14 +23,17 @@ if ( isset($_GET['key']) )
 	$is_admin 	= 0;
 	if (isset($_GET['is_admin']))
 		$is_admin = $_GET['is_admin'];
+
+	$campaign = isset($_GET['campaign']) ? 1 : '';
 	
 	$dg = new dg();
 	
-	if($check !== false)
+	if($check !== false || !empty($campaign))
 	{
 		$cache 	= $dg->cache('cart');
 		$params = explode(':', $key);
-		$data 	= $cache->get($params[1]);
+		$data 	= !empty($campaign) ? $cache->get($params[0]) : $cache->get($params[1]);
+		
 		if(isset($data['vector']) && empty($data['vectors']))
 		{
 			$data['vectors'] = $data['vector'];
@@ -124,56 +126,6 @@ if ( isset($_GET['key']) )
 					$svg 		= '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" data-zoom="'.$zoom.'" height="'.$view->height.'" width="'.$view->width.'" x="'.$view->left.'" y="'.$view->top.'">';
 					$svgPNG 	= '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" data-zoom="'.$zoom.'" height="'.$view->height.'" width="'.$view->width.'" x="'.$view->left.'" y="'.$view->top.'">';
 					
-					/* add mask background. */
-					if ( isset($product->download_mask) && $product->download_mask == 1)
-					{						
-						$designProduct = $design->$position;
-						$elms = str_replace("'", '"', $designProduct[0]);
-						$elms = str_replace('["', '[', $elms);
-						$elms = str_replace('"]', ']', $elms);
-						$elms = json_decode($elms, true);
-						
-						$arr_elms = $elms;
-						$elmsort = array();
-						for($i = count($elms) - 1; $i >= 0; $i--)
-						{
-							$elmsort[] = $arr_elms[$i];
-						}
-						
-						if (isset($elmsort) && count($elmsort) > 0)
-						{
-							foreach($elmsort as $elm)
-							{
-								if(isset($elm['id']) && $elm['id'] == 'area-design')
-									break;
-								
-								if (isset($elm['ismask']) && $elm['ismask'] == 1)
-								{
-									$imgdata 	= $dg->openURL($elm['img']);
-									$file_name = 'data:image/PNG;base64,' . base64_encode($imgdata);
-									$mask_top = 0;
-									$mask_left = 0;
-									if((float) $view->top < (float) $elm['height'])
-									{
-										$mask_top = (float) $elm['top'] - $view->top;
-									}
-									if((float) $view->left < (float) $elm['width'])
-									{
-										$mask_left = (float) $elm['left'] - (float) $view->left;
-									}
-									
-									$svg .= '<svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" height="'.$elm['height'].'" width="'.$elm['width'].'" x="'.$mask_left.'px" y="'.$mask_top.'px">'
-											.'<image preserveAspectRatio="none" xlink:href="'.$file_name.'" height="'.$elm['height'].'" width="'.$elm['width'].'" y="0" x="0"/>'
-											.'</svg>';
-											
-									$svgPNG .= '<svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" height="'.$elm['height'].'" width="'.$elm['width'].'" x="'.$mask_left.'px" y="'.$mask_top.'px">'
-											.'<image preserveAspectRatio="none" xlink:href="'.$file_name.'" height="'.$elm['height'].'" width="'.$elm['width'].'" y="0" x="0"/>'
-											.'</svg>';
-								}
-							}
-						}
-					}
-					
 					// GET DESIGN OF ORDER
 					if(isset($data['vector']))
 					{
@@ -248,6 +200,9 @@ if ( isset($_GET['key']) )
 						$item->svg 	= str_replace('NS1:xmlns:xlink', '', $item->svg); 	// IF IE
  						$item->svg 	= str_replace('xmlns:xml', 'xmlns:xlink', $item->svg); 	// IF IE
 						$item->svg 	= str_replace(' xmlns:xlink ', ' ', $item->svg); 	// IF IE
+
+						$item->svg 	= str_replace('url(#affTextFilteritem-0)', 'url(#affTextFilteritem-'.$item->id.')', $item->svg);
+						$item->svg 	= str_replace('id="affTextFilteritem-0"', 'id="affTextFilteritem-'.$item->id.'"', $item->svg);
 						
 						$count = explode('xmlns:xlink="http://www.w3.org/1999/xlink"', $item->svg);
 						if (count($count) > 2)
@@ -304,7 +259,11 @@ if ( isset($_GET['key']) )
 							}
 						}									
 						$dom = new DOMDocument();
-						$dom->loadXML($item->svg, LIBXML_PARSEHUGE);
+						if (version_compare(LIBXML_VERSION, '20700', '>=')) {
+							$dom->loadXML($item->svg, LIBXML_PARSEHUGE);
+						} else {
+							$dom->loadXML($item->svg);
+						}
 						
 						// team
 						if($item->type == 'team')
@@ -437,53 +396,32 @@ if ( isset($_GET['key']) )
 						}
 					}					
 						
-					/* add mask top layer. */
+					// add mask
 					if ( isset($product->download_mask) && $product->download_mask == 1)
-					{						
+					{
 						$designProduct = $design->$position;
 						$elms = str_replace("'", '"', $designProduct[0]);
 						$elms = str_replace('["', '[', $elms);
 						$elms = str_replace('"]', ']', $elms);
-						$elms = json_decode($elms, true);
+						$elms = json_decode($elms);
 						
-						$arr_elms = $elms;
-						$elmsort = array();
-						for($i = count($elms) - 1; $i >= 0; $i--)
-						{
-							$elmsort[] = $arr_elms[$i];
-						}
 						
-						if (isset($elmsort) && count($elmsort) > 0)
+						if (isset($elms) && count($elms) > 0)
 						{
-							$check = false;
-							foreach($elmsort as $elm)
+							foreach($elms as $elm)
 							{
-								if (isset($elm['ismask']) && $elm['ismask'] == 1 && $check == true)
+								if (isset($elm->ismask) && $elm->ismask == 1)
 								{
-									$imgdata 	= $dg->openURL($elm['img']);
-									$file_name = 'data:image/PNG;base64,' . base64_encode($imgdata);
-									$mask_top = 0;
-									$mask_left = 0;
-									if((float) $view->top < (float) $elm['height'])
-									{
-										$mask_top = (float) $elm['top'] - $view->top;
-									}
-									if((float) $view->left < (float) $elm['width'])
-									{
-										$mask_left = (float) $elm['left'] - (float) $view->left;
-									}
-									
-									$svg .= '<svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" height="'.$elm['height'].'" width="'.$elm['width'].'" x="'.$mask_left.'px" y="'.$mask_top.'px">'
-											.'<image preserveAspectRatio="none" xlink:href="'.$file_name.'" height="'.$elm['height'].'" width="'.$elm['width'].'" y="0" x="0"/>'
+									$file_name = $elm->img;
+									//echo '<pre>'; echo ($elm->width * $zoom); print_r($elm); exit;
+									$svg .= '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" height="'.$elm->height.'" width="'.$elm->width.'" x="0" y="0">'
+											.'<image xlink:href="'.$file_name.'" height="'.$elm->height.'" width="'.$elm->width.'" y="0" x="0"/>'
 											.'</svg>';
 											
-									$svgPNG .= '<svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" height="'.$elm['height'].'" width="'.$elm['width'].'" x="'.$mask_left.'px" y="'.$mask_top.'px">'
-											.'<image preserveAspectRatio="none" xlink:href="'.$file_name.'" height="'.$elm['height'].'" width="'.$elm['width'].'" y="0" x="0"/>'
+									$svgPNG .= '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" height="'.$elm->height.'" width="'.$elm->width.'" x="0" y="0">'
+											.'<image xlink:href="'.$file_name.'" height="'.$elm->height.'" width="'.$elm->width.'" y="0" x="0"/>'
 											.'</svg>';
 								}
-								
-								if(isset($elm['id']) && $elm['id'] == 'area-design')
-									$check = true;
 							}
 						}
 					}
@@ -510,7 +448,11 @@ if ( isset($_GET['key']) )
 					{
 						$dom = new DOMDocument;
 						
-						$dom->loadXML($svgPNG, LIBXML_PARSEHUGE);
+						if (version_compare(LIBXML_VERSION, '20700', '>=')) {
+							$dom->loadXML($svgPNG, LIBXML_PARSEHUGE);
+						} else {
+							$dom->loadXML($svgPNG);
+						}
 						
 						$books = $dom->getElementsByTagName('svg');
 						$check = false;

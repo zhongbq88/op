@@ -1,6 +1,9 @@
 jQuery(document).ready(function(){
 	jQuery( ".size-number" ).spinner({
 		min: 0,
+		start: function(){
+			return design.team.changeSize();
+		},
 		stop: function(event, ui){
 			design.products.sizes();
 		}
@@ -45,6 +48,10 @@ jQuery(document).on('after.load.design', function(event, data){
 				}
 			}
 			update_attributes(attr_options);
+		} else if (typeof data.design.item.qty != 'undefined') {
+			if (data.design.item.qty > 0) {
+				jQuery('#quantity').val(data.design.item.qty);
+			}
 		}
 	}
 });
@@ -94,6 +101,7 @@ function update_attributes(attr_options)
 						else
 						{
 							jQuery(this).val(p_attributes[name]);
+							design.products.sizes();
 						}
 					}
 					else
@@ -108,6 +116,9 @@ function update_attributes(attr_options)
 jQuery(document).on('product.change.design', function(evt, product) {
 	jQuery( ".size-number" ).spinner({
 		min: 0,
+		start: function(){
+			return design.team.changeSize();
+		},
 		stop: function(event, ui){
 			design.products.sizes();
 		}

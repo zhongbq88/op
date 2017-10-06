@@ -906,7 +906,7 @@ class dg{
 			);
 			
 			$addons->view('hooks' .DS. 'product', $params);	
-			
+			//if (isset($GLOBALS['post'])) $post = $GLOBALS['post']; // Fixed #32165
 					
 			$result 		= $cart->totalPrice($product, $post, $setting);
 						
@@ -1066,6 +1066,9 @@ class dg{
 			$total->old 		= number_format($total->old, $number, $price_decimal, $price_thousand);
 			$total->sale 		= number_format($total->sale, $number, $price_decimal, $price_thousand);
 			
+			$total->price_decimal = $price_decimal;		// fixed #32763
+			$total->price_thousand = $price_thousand;	// fixed #32763
+
 			return $total;
 		}	
 	}
@@ -1403,6 +1406,10 @@ class dg{
 				'designs' => $designs,
 			);
 			$addons->view('hooks' .DS. 'cart_design', $params);
+			if( isset($data['options']) )
+			{
+				$designs['options']	= $data['options'];
+			}
 			$cache->set($rowid, $designs);
 			
 			
@@ -1504,9 +1511,9 @@ class dg{
 	*/
 	public function photoColor($image, $color)
 	{
-		$newColor 	= $this->rgb_to_array($color);
+		$newColor 		= $this->rgb_to_array($color);
 		
-		$img 		= imagecreatefromstring($image);
+		$img 			= imagecreatefromstring($image);
 
 		$w 			= imagesx($img);
 		$h 			= imagesy($img);
@@ -1527,7 +1534,7 @@ class dg{
 
 		return $data;
 	}
-	
+
 	public function readFile($file)
 	{
 		if ( ! file_exists($file))

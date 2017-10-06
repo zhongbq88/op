@@ -58,6 +58,8 @@ design.ajax.getPrice = function() {
 };
 
 design.ajax.addJs = function() {
+	if (this.isBlank() == false) return false;
+	
 	jQuery.ajax({
 		url: mainURL + 'index.php?route=tshirtecommerce/designer_api_oc/validate1564',
 		type: 'post',
@@ -602,10 +604,14 @@ jQuery(document).on('after.addtocart.design', function(event, data) {
 				}
 			}
 		}
+		if (typeof ocdatas.product_id !== 'undefined') {
+			content.product.t_product_id = ocdatas.product_id;
+		}
 		content.product.option_oc = str;
 		content.product.tattributes = jQuery('#tool_cart').serializeObject();
 		if (content.error == 0) {
 			content.product.product_id = parent_id;
+			content.product.refer = jQuery('#oc_tool_cart input[name=refer]').val();
 			window.parent.app.cart(content.product);
 		} else {
 			alert(content.msg);
