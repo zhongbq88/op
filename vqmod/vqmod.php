@@ -4,7 +4,7 @@
  * @description Main Object used
  */
 abstract class VQMod {
-	public static $_vqversion = '2.6.1';						// Current version number
+	public static $_vqversion = '2.6.2';						// Current version number
 
 	private static $_modFileList = array();						// Array of xml files
 	private static $_mods = array();							// Array of modifications to apply
@@ -117,7 +117,7 @@ abstract class VQMod {
 			return $sourceFile;
 		}
 
-		$stripped_filename = preg_replace('~^' . preg_quote(self::getCwd(), '~i') . '~', '', $sourcePath);
+		$stripped_filename = preg_replace('~^' . preg_quote(self::getCwd(), '~') . '~i', '', $sourcePath);
 		$cacheFile = self::_cacheName($stripped_filename);
 		$file_last_modified = filemtime($sourcePath);
 
@@ -824,7 +824,7 @@ class VQModObject {
 					$ignoreif = $operation->getElementsByTagName('ignoreif')->item(0);
 
 					if($ignoreif) {
-						$ignoreif = new VQNode($ignoreif);
+						$ignoreif = new VQSearchNode($ignoreif);
 					} else {
 						$ignoreif = false;
 					}

@@ -675,28 +675,28 @@ var dgUI = {
 			
 			html = html + '<td class="center">'
 						+ 	'<input type="hidden" name="product[design][front][]" value="" id="front-products-design-'+count+'"/>'
-						+ 	'<img alt="" src="" width="50" id="front-products-img-'+count+'"/> <br/>'
+						+ 	'<img alt="" src="'+base_url+'/assets/images/no-image.jpg'+'" width="50" id="front-products-img-'+count+'"/> <br/>'
 						+ 	'<a href="javascript:void(0)" class="pull-left" onclick="dgUI.product.design(this, \'front\')">Configure</a>'
 						+ 	'<a onclick="dgUI.product.removeDesign(this, \'front\')" style="color:#ff0000;" class="pull-right"  href="javascript:void(0)">Remove</a>'
 						+ '</td>';
 			
 			html = html + '<td class="center">'
 						+ 	'<input type="hidden" name="product[design][back][]" value="" id="back-products-design-'+count+'"/>'
-						+ 	'<img alt="" src="" width="50" id="back-products-img-'+count+'"/> <br/>'
+						+ 	'<img alt="" src="'+base_url+'/assets/images/no-image.jpg'+'" width="50" id="back-products-img-'+count+'"/> <br/>'
 						+ 	'<a href="javascript:void(0)" class="pull-left" onclick="dgUI.product.design(this, \'back\')">Configure</a>'
 						+ 	'<a onclick="dgUI.product.removeDesign(this, \'back\')" style="color:#ff0000;" class="pull-right"  href="javascript:void(0)">Remove</a>'
 						+ '</td>';
 			
 			html = html + '<td class="center">'
 						+ 	'<input type="hidden" name="product[design][left][]" value="" id="left-products-design-'+count+'"/>'
-						+ 	'<img alt="" src="" width="50" id="left-products-img-'+count+'"/> <br/>'
+						+ 	'<img alt="" src="'+base_url+'/assets/images/no-image.jpg'+'" width="50" id="left-products-img-'+count+'"/> <br/>'
 						+ 	'<a href="javascript:void(0)" class="pull-left" onclick="dgUI.product.design(this, \'left\')">Configure</a>'
 						+ 	'<a onclick="dgUI.product.removeDesign(this, \'left\')" style="color:#ff0000;" class="pull-right"  href="javascript:void(0)">Remove</a>'
 						+ '</td>';
 			
 			html = html + '<td class="center">'
 						+ 	'<input type="hidden" name="product[design][right][]" value="" id="right-products-design-'+count+'"/>'
-						+ 	'<img alt="" src="" width="50" id="right-products-img-'+count+'"/> <br/>'
+						+ 	'<img alt="" src="'+base_url+'/assets/images/no-image.jpg'+'" width="50" id="right-products-img-'+count+'"/> <br/>'
 						+ 	'<a href="javascript:void(0)" class="pull-left" onclick="dgUI.product.design(this, \'right\')">Configure</a>'
 						+ 	'<a onclick="dgUI.product.removeDesign(this, \'right\')" style="color:#ff0000;" class="pull-right"  href="javascript:void(0)">Remove</a>'
 						+ '</td>';

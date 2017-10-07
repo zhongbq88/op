@@ -1,9 +1,10 @@
 <?php
+
 /**
  * @author 		tshirtecommerce - www.tshirtecommerce.com
- * @date  		2016, June 29
+ * @date  		September 13, 2017
  *
- * API 			4.1.3
+ * Version		4.2.0
  * 
  * @copyright  	Copyright (C) 2015 tshirtecommerce.com. All rights reserved.
  * @license	   	GNU General Public License version 2 or later; see LICENSE
@@ -24,7 +25,7 @@ class ModelTshirtecommerceProduct extends Model
 		");
 		if ($query->num_rows) {
 			$design_product_id_temp = $query->rows[0]['design_product_id'];
-			if(!defined('DS')) define('DS', DIRECTORY_SEPARATOR);
+			if (!defined('DS')) define('DS', DIRECTORY_SEPARATOR);
 			if (!defined('ROOT')) define('ROOT', dirname(DIR_SYSTEM).DIRECTORY_SEPARATOR.'tshirtecommerce');
 			if (file_exists(ROOT.DS.'includes'.DS.'functions.php')) {
 				include_once ROOT.DS.'includes'.DS.'functions.php';
@@ -50,10 +51,10 @@ class ModelTshirtecommerceProduct extends Model
 				}
 
 				$print_types = array(
-					'screen'=> $addons->__('settings_print_screen'),
-					'DTG'=> $addons->__('settings_print_DTG'),
-					'sublimation'=> $addons->__('settings_print_sublimation'),
-					'embroidery'=> $addons->__('settings_print_embroidery'),
+					'screen'		=> $addons->__('settings_print_screen'),
+					'DTG'			=> $addons->__('settings_print_DTG'),
+					'sublimation'	=> $addons->__('settings_print_sublimation'),
+					'embroidery'	=> $addons->__('settings_print_embroidery'),
 				);
 				
 				/* @todo: Get print type from custom */
@@ -61,11 +62,36 @@ class ModelTshirtecommerceProduct extends Model
 			}
 
 			return array(
-				'print_type' => $print_type, 
-				'show_attribute' => $show_attribute, 
-				'design' => $design, 
-				'print_types' => $print_types
+				'print_type' 		=> $print_type, 
+				'show_attribute' 	=> $show_attribute, 
+				'design' 			=> $design, 
+				'print_types' 		=> $print_types
 			);
+		}
+		return false;
+	}
+
+	/* @since version 4.2.0
+	 * only use for Campaign addon
+	 * get campaign information to view in back-office
+	 * for fixed #1
+	 */
+	public function get_campaign_info($product_id)
+	{
+		$this->load->language('extension/module/tshirtecommerce');
+
+		$running 	= $this->language->get('tshirtecommerce_addon_campaign_label_status_running');
+		$ended 		= $this->language->get('tshirtecommerce_addon_campaign_label_status_ended');
+
+		if ($product_id > 0) {
+			$query = $this->db->query('
+				SELECT p.`product_id`, p.`date_added`, p.`date_end`, p.`author`,
+					IF( p.`date_end` > NOW(), "'.$running.'", "'.$ended.'") AS status,
+					(SELECT SUM(op.`quantity`) FROM `'.DB_PREFIX.'order_product` op WHERE op.`product_id` = '.(int)$product_id.') AS sold
+				FROM `'.DB_PREFIX.'product` p
+				WHERE p.`product_id` = '.(int)$product_id.'
+			');
+			if ($query->num_rows) return $query->row;
 		}
 		return false;
 	}

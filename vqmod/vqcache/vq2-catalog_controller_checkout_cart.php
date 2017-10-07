@@ -18,6 +18,7 @@ class ControllerCheckoutCart extends Controller {
 		);
 
 		if ($this->cart->hasProducts() || !empty($this->session->data['vouchers'])) {
+<<<<<<< HEAD
 			$data['heading_title'] = $this->language->get('heading_title');
 
 			$data['text_recurring_item'] = $this->language->get('text_recurring_item');
@@ -36,6 +37,8 @@ class ControllerCheckoutCart extends Controller {
 			$data['button_shopping'] = $this->language->get('button_shopping');
 			$data['button_checkout'] = $this->language->get('button_checkout');
 
+=======
+>>>>>>> 1c170fe64a36c3191167bac857d158e8ff3ecf46
 			if (!$this->cart->hasStock() && (!$this->config->get('config_stock_checkout') || $this->config->get('config_stock_warning'))) {
 				$data['error_warning'] = $this->language->get('error_stock');
 			} elseif (isset($this->session->data['error'])) {
@@ -73,6 +76,13 @@ class ControllerCheckoutCart extends Controller {
 
 			$data['products'] = array();
 
+<<<<<<< HEAD
+=======
+
+				/* Path: vqmod/xml/tshirtecommerce_product.xml */
+				$this->load->model('tshirtecommerce/order');
+			
+>>>>>>> 1c170fe64a36c3191167bac857d158e8ff3ecf46
 			$products = $this->cart->getProducts();
 
 			foreach ($products as $product) {
@@ -89,7 +99,11 @@ class ControllerCheckoutCart extends Controller {
 				}
 
 				if ($product['image']) {
+<<<<<<< HEAD
 					$image = $this->model_tool_image->resize($product['image'], $this->config->get($this->config->get('config_theme') . '_image_cart_width'), $this->config->get($this->config->get('config_theme') . '_image_cart_height'));
+=======
+					$image = $this->model_tool_image->resize($product['image'], $this->config->get('theme_' . $this->config->get('config_theme') . '_image_cart_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_cart_height'));
+>>>>>>> 1c170fe64a36c3191167bac857d158e8ff3ecf46
 				} else {
 					$image = '';
 				}
@@ -134,7 +148,11 @@ class ControllerCheckoutCart extends Controller {
 						'week'       => $this->language->get('text_week'),
 						'semi_month' => $this->language->get('text_semi_month'),
 						'month'      => $this->language->get('text_month'),
+<<<<<<< HEAD
 						'year'       => $this->language->get('text_year'),
+=======
+						'year'       => $this->language->get('text_year')
+>>>>>>> 1c170fe64a36c3191167bac857d158e8ff3ecf46
 					);
 
 					if ($product['recurring']['trial']) {
@@ -149,6 +167,7 @@ class ControllerCheckoutCart extends Controller {
 				}
 
 
+<<<<<<< HEAD
 				if (!defined('DS')) define('DS', DIRECTORY_SEPARATOR);
 				if (!defined('ROOT')) define('ROOT', dirname(DIR_SYSTEM).DS.'tshirtecommerce');
 				include_once ROOT.DS.'includes'.DS.'functions.php';
@@ -261,6 +280,18 @@ class ControllerCheckoutCart extends Controller {
 				'parent_id' => (isset($product['design']['product_id']) ? $product['design']['product_id'] : 0),
 				'design_product_id' => (isset($design_product_id) ? $design_product_id : 0),
 			
+=======
+				/* Path: vqmod/xml/tshirtecommerce_product.xml */
+				$tshirtecommerce = $this->model_tshirtecommerce_order->getCartOption($product['cart_id']);
+				$tshirtecommerce = isset($tshirtecommerce['tshirtecommerce']) ? $tshirtecommerce['tshirtecommerce'] : array();
+				if (count($tshirtecommerce) > 0) $tshirtecommerce['parent_id'] = $product['product_id'];
+
+				// extend option_data here
+				$option_data_new = $this->model_tshirtecommerce_order->extendOptions($tshirtecommerce, $option_data);
+				$option_data = $option_data_new;
+			
+				$data['products'][] = array(
+>>>>>>> 1c170fe64a36c3191167bac857d158e8ff3ecf46
 					'cart_id'   => $product['cart_id'],
 					'thumb'     => $image,
 					'name'      => $product['name'],
@@ -291,7 +322,11 @@ class ControllerCheckoutCart extends Controller {
 			}
 
 			// Totals
+<<<<<<< HEAD
 			$this->load->model('extension/extension');
+=======
+			$this->load->model('setting/extension');
+>>>>>>> 1c170fe64a36c3191167bac857d158e8ff3ecf46
 
 			$totals = array();
 			$taxes = $this->cart->getTaxes();
@@ -308,16 +343,27 @@ class ControllerCheckoutCart extends Controller {
 			if ($this->customer->isLogged() || !$this->config->get('config_customer_price')) {
 				$sort_order = array();
 
+<<<<<<< HEAD
 				$results = $this->model_extension_extension->getExtensions('total');
 
 				foreach ($results as $key => $value) {
 					$sort_order[$key] = $this->config->get($value['code'] . '_sort_order');
+=======
+				$results = $this->model_setting_extension->getExtensions('total');
+
+				foreach ($results as $key => $value) {
+					$sort_order[$key] = $this->config->get('total_' . $value['code'] . '_sort_order');
+>>>>>>> 1c170fe64a36c3191167bac857d158e8ff3ecf46
 				}
 
 				array_multisort($sort_order, SORT_ASC, $results);
 
 				foreach ($results as $result) {
+<<<<<<< HEAD
 					if ($this->config->get($result['code'] . '_status')) {
+=======
+					if ($this->config->get('total_' . $result['code'] . '_status')) {
+>>>>>>> 1c170fe64a36c3191167bac857d158e8ff3ecf46
 						$this->load->model('extension/total/' . $result['code']);
 						
 						// We have to put the totals in an array so that they pass by reference.
@@ -347,7 +393,11 @@ class ControllerCheckoutCart extends Controller {
 
 			$data['checkout'] = $this->url->link('checkout/checkout', '', true);
 
+<<<<<<< HEAD
 			$this->load->model('extension/extension');
+=======
+			$this->load->model('setting/extension');
+>>>>>>> 1c170fe64a36c3191167bac857d158e8ff3ecf46
 
 			$data['modules'] = array();
 			
@@ -372,12 +422,17 @@ class ControllerCheckoutCart extends Controller {
 
 			$this->response->setOutput($this->load->view('checkout/cart', $data));
 		} else {
+<<<<<<< HEAD
 			$data['heading_title'] = $this->language->get('heading_title');
 
 			$data['text_error'] = $this->language->get('text_empty');
 
 			$data['button_continue'] = $this->language->get('button_continue');
 
+=======
+			$data['text_error'] = $this->language->get('text_empty');
+			
+>>>>>>> 1c170fe64a36c3191167bac857d158e8ff3ecf46
 			$data['continue'] = $this->url->link('common/home');
 
 			unset($this->session->data['success']);
@@ -409,6 +464,7 @@ class ControllerCheckoutCart extends Controller {
 		$product_info = $this->model_catalog_product->getProduct($product_id);
 
 		if ($product_info) {
+<<<<<<< HEAD
 			if (isset($this->request->post['quantity']) && ((int)$this->request->post['quantity'] >= $product_info['minimum'])) {
 				$quantity = (int)$this->request->post['quantity'];
 			} else {
@@ -560,11 +616,110 @@ class ControllerCheckoutCart extends Controller {
 										}
 									} else {
 										$temp_design_option_oc[$tstr[0]][] = $tstr[1];
+=======
+			if (isset($this->request->post['quantity'])) {
+				$quantity = (int)$this->request->post['quantity'];
+			} else {
+				$quantity = 1;
+			}
+
+			if (isset($this->request->post['option'])) {
+				$option = array_filter($this->request->post['option']);
+			} else {
+				$option = array();
+			}
+
+			$product_options = $this->model_catalog_product->getProductOptions($this->request->post['product_id']);
+
+				/* vqmod/xml/tshirtecommerce_product.xml */
+				$this->load->model('tshirtecommerce/sproduct');
+				if (isset($this->request->post['tshirtecommerce'])) {
+					$tshirtecommerces = $this->request->post['tshirtecommerce'];
+
+					if (isset($tshirtecommerces['colors'])) {
+						$check_tshirtecommerce_colors = explode(';', $tshirtecommerces['colors']);
+						if (count($check_tshirtecommerce_colors) > 0) {
+							$tmp_colors = array();
+							foreach ($check_tshirtecommerce_colors as $tcolor_hex) {
+								if (!empty($tcolor_hex))
+									$tmp_colors[] = $tcolor_hex;
+							}
+							$tshirtecommerces['colors'] = $tmp_colors;
+						}
+					} else {
+						$tshirtecommerces['colors'] = false;
+					}
+
+					$tshirtecommerce = $this->model_tshirtecommerce_sproduct->getQtyAndPrice($tshirtecommerces, $this->request->post['product_id'], $quantity, true);
+					$quantity = ($tshirtecommerce['quantity'] > 1) ? $tshirtecommerce['quantity'] : 1;
+					if ($tshirtecommerce['type'] != 'cart') {
+						$option['tshirtecommerce']['price_of_print'] = $tshirtecommerce['price_of_print'];
+					}
+					$option['tshirtecommerce']['options'] = $tshirtecommerces;
+				} elseif (isset($this->request->post['design'])) {
+					$tshirtecommerces = $this->request->post['design'];
+					if (isset($tshirtecommerces) && count($tshirtecommerces) > 0 && isset($tshirtecommerces['refer']) && $tshirtecommerces['refer'] == 'designer') {
+						if (isset($tshirtecommerces['color_hex'])) {
+							$check_tshirtecommerce_colors = explode(';', $tshirtecommerces['color_hex']);
+							if (count($check_tshirtecommerce_colors) > 0) {
+								$tmp_colors = array();
+								foreach ($check_tshirtecommerce_colors as $tcolor_hex) {
+									if (!empty($tcolor_hex))
+										$tmp_colors[] = $tcolor_hex;
+								}
+								$tshirtecommerces['colors'] = $tmp_colors;
+							}
+						} else {
+							$tshirtecommerces['colors'] = false;
+						}
+						$tshirtecommerces['type'] = 'cart';
+						$tshirtecommerce = $this->model_tshirtecommerce_sproduct->getQtyAndPrice($tshirtecommerces, $this->request->post['product_id'], $quantity, true);
+						$quantity = ($tshirtecommerce['quantity'] > 1) ? $tshirtecommerce['quantity'] : 1;
+						$option['tshirtecommerce']['price_of_print'] = $tshirtecommerce['price_of_print'];
+						$option['tshirtecommerce']['options'] = $tshirtecommerces;
+
+						// update opencart option
+						if (isset($tshirtecommerces['option_oc']) && !empty($tshirtecommerces['option_oc'])) {
+							$oc_option = array();
+							$str_option_oc = str_replace('&quot;', '"', $tshirtecommerces['option_oc']);
+							$array_option_oc = explode(';;', $str_option_oc);
+							if (count($array_option_oc) > 0) {
+								foreach ($array_option_oc as $row) {
+									if (!empty($row) && $row != '') {
+										$str_row_array = explode('::', $row);
+										if (count($str_row_array) > 1) {
+											$str_row_child = explode(',', $str_row_array[1]);
+											if (count($str_row_child) > 0) {
+												foreach ($str_row_child as $r) {
+													if (!empty($r) && $r != '') $oc_option[$str_row_array[0]][] = $r;
+												}
+											}
+										}
+									}
+								}
+							}
+							if (count($oc_option) > 0) {
+								foreach ($oc_option as $key => $value) {
+									if (isset($product_options) && count($product_options) > 0) {
+										foreach ($product_options as $po) {
+											if ($po['product_option_id'] == $key) {
+												if ($po['type'] == 'text' || $po['type'] == 'textarea' || $po['type'] == 'file' || $po['type'] == 'date' || $po['type'] == 'datetime' || $po['type'] == 'time' || $po['type'] == 'select' || $po['type'] == 'radio') {
+													$option[$key] = isset($value[0]) ? $value[0] : '';
+												} else {
+													$option[$key] = $value;
+												}
+												break;
+											}
+										}
+									} else {
+										$option[$key] = $value;
+>>>>>>> 1c170fe64a36c3191167bac857d158e8ff3ecf46
 									}
 								}
 							}
 						}
 					}
+<<<<<<< HEAD
 					$this->request->post['option'] = $temp_design_option_oc;
 				}
 			
@@ -575,6 +730,10 @@ class ControllerCheckoutCart extends Controller {
 			}
 
 			$product_options = $this->model_catalog_product->getProductOptions($this->request->post['product_id']);
+=======
+				}
+			
+>>>>>>> 1c170fe64a36c3191167bac857d158e8ff3ecf46
 
 			foreach ($product_options as $product_option) {
 				if ($product_option['required'] && empty($option[$product_option['product_option_id']])) {
@@ -603,6 +762,7 @@ class ControllerCheckoutCart extends Controller {
 			}
 
 			if (!$json) {
+<<<<<<< HEAD
 
 				if (isset($this->request->post['design'])) {
 					$design = $this->request->post['design'];
@@ -672,6 +832,8 @@ class ControllerCheckoutCart extends Controller {
 					}
 				}
 			
+=======
+>>>>>>> 1c170fe64a36c3191167bac857d158e8ff3ecf46
 				$this->cart->add($this->request->post['product_id'], $quantity, $option, $recurring_id);
 
 				$json['success'] = sprintf($this->language->get('text_success'), $this->url->link('product/product', 'product_id=' . $this->request->post['product_id']), $product_info['name'], $this->url->link('checkout/cart'));
@@ -683,7 +845,11 @@ class ControllerCheckoutCart extends Controller {
 				unset($this->session->data['payment_methods']);
 
 				// Totals
+<<<<<<< HEAD
 				$this->load->model('extension/extension');
+=======
+				$this->load->model('setting/extension');
+>>>>>>> 1c170fe64a36c3191167bac857d158e8ff3ecf46
 
 				$totals = array();
 				$taxes = $this->cart->getTaxes();
@@ -700,16 +866,27 @@ class ControllerCheckoutCart extends Controller {
 				if ($this->customer->isLogged() || !$this->config->get('config_customer_price')) {
 					$sort_order = array();
 
+<<<<<<< HEAD
 					$results = $this->model_extension_extension->getExtensions('total');
 
 					foreach ($results as $key => $value) {
 						$sort_order[$key] = $this->config->get($value['code'] . '_sort_order');
+=======
+					$results = $this->model_setting_extension->getExtensions('total');
+
+					foreach ($results as $key => $value) {
+						$sort_order[$key] = $this->config->get('total_' . $value['code'] . '_sort_order');
+>>>>>>> 1c170fe64a36c3191167bac857d158e8ff3ecf46
 					}
 
 					array_multisort($sort_order, SORT_ASC, $results);
 
 					foreach ($results as $result) {
+<<<<<<< HEAD
 						if ($this->config->get($result['code'] . '_status')) {
+=======
+						if ($this->config->get('total_' . $result['code'] . '_status')) {
+>>>>>>> 1c170fe64a36c3191167bac857d158e8ff3ecf46
 							$this->load->model('extension/total/' . $result['code']);
 
 							// We have to put the totals in an array so that they pass by reference.
@@ -744,7 +921,19 @@ class ControllerCheckoutCart extends Controller {
 		// Update
 		if (!empty($this->request->post['quantity'])) {
 			foreach ($this->request->post['quantity'] as $key => $value) {
+<<<<<<< HEAD
 				$this->cart->update($key, $value);
+=======
+				
+				$this->load->model('tshirtecommerce/order');
+				$tcheck = $this->model_tshirtecommerce_order->editCart($key);
+				if ($tcheck['error'] == 0) {
+					$this->cart->update($key, $value);
+				} else {
+					$this->session->data['error'] = $tcheck['msg'];
+				}
+			
+>>>>>>> 1c170fe64a36c3191167bac857d158e8ff3ecf46
 			}
 
 			$this->session->data['success'] = $this->language->get('text_remove');
@@ -782,7 +971,11 @@ class ControllerCheckoutCart extends Controller {
 			unset($this->session->data['reward']);
 
 			// Totals
+<<<<<<< HEAD
 			$this->load->model('extension/extension');
+=======
+			$this->load->model('setting/extension');
+>>>>>>> 1c170fe64a36c3191167bac857d158e8ff3ecf46
 
 			$totals = array();
 			$taxes = $this->cart->getTaxes();
@@ -799,16 +992,27 @@ class ControllerCheckoutCart extends Controller {
 			if ($this->customer->isLogged() || !$this->config->get('config_customer_price')) {
 				$sort_order = array();
 
+<<<<<<< HEAD
 				$results = $this->model_extension_extension->getExtensions('total');
 
 				foreach ($results as $key => $value) {
 					$sort_order[$key] = $this->config->get($value['code'] . '_sort_order');
+=======
+				$results = $this->model_setting_extension->getExtensions('total');
+
+				foreach ($results as $key => $value) {
+					$sort_order[$key] = $this->config->get('total_' . $value['code'] . '_sort_order');
+>>>>>>> 1c170fe64a36c3191167bac857d158e8ff3ecf46
 				}
 
 				array_multisort($sort_order, SORT_ASC, $results);
 
 				foreach ($results as $result) {
+<<<<<<< HEAD
 					if ($this->config->get($result['code'] . '_status')) {
+=======
+					if ($this->config->get('total_' . $result['code'] . '_status')) {
+>>>>>>> 1c170fe64a36c3191167bac857d158e8ff3ecf46
 						$this->load->model('extension/total/' . $result['code']);
 
 						// We have to put the totals in an array so that they pass by reference.

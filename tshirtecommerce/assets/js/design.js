@@ -543,8 +543,9 @@ var design={
 					if (typeof $btn != 'undefined')
 					{
 						$btn.button('reset');
-						var html = div.html();
-						div.html(html + data);
+						div.append(data);
+						jQuery('#dg-mydesign .loadingImage').remove();
+						jQuery('.list-design-saved').attr('style', '');
 					}
 					else
 					{
@@ -1657,6 +1658,9 @@ var design={
 					var fonts = this.fonts.fonts;
 				}
 				jQuery.each(fonts, function(i, font){
+					if(font.published == 0)
+						return;
+					
 					var a = document.createElement('a');
 						a.className = 'box-font';							
 						a.setAttribute('href', 'javascript:void(0)');
@@ -2421,6 +2425,7 @@ var design={
 			{
 				this.create();
 				jQuery('#dg-item_team_list').modal();
+				return false;
 			}
 		},
 		save: function(){			
@@ -2487,7 +2492,8 @@ var design={
 				if (jQuery('.size-number').length > 0)
 				{
 					jQuery('.size-number').each(function(){
-						var lable = jQuery(this).parent().find('label').data('id');
+						//var lable = jQuery(this).parent().find('label').data('id');
+						var lable = jQuery(this).parents('li').find('label').data('id');
 						var value = jQuery(this).attr('name');
 							value = value.replace('][', '-');
 							value = value.replace('][', '-');
@@ -2509,7 +2515,11 @@ var design={
 					});
 				}
 			}
-			design.products.sizes();
+			if (jQuery('.size-number').length > 0)
+			{
+				design.products.sizes();
+			}
+			design.ajax.getPrice();
 		}
 	},
 	text:{
@@ -3311,8 +3321,8 @@ var design={
 			jQuery(span).data('width', item.width);
 			jQuery(span).data('height', item.height);
 			
+			design.zIndex  	= parseInt(design.zIndex) + 5;
 			span.style.zIndex = design.zIndex;
-			design.zIndex  	= design.zIndex + 5;
 			span.style.width = item.width;
 			span.style.height = item.height;
 			
@@ -3520,7 +3530,7 @@ var design={
 			jQuery(span).data('height', item.height);
 			
 			span.style.zIndex = item.zIndex;
-			design.zIndex = parseInt(item.zIndex) + 1;
+			design.zIndex = parseInt(item.zIndex);
 			
 			jQuery(document).triggerHandler( "before.imports.item.design", [span, item]);
 			if(item.svg.indexOf('svg') == -1) return;
@@ -3740,7 +3750,7 @@ var design={
 			else var o = e;
 			o.rotatable({angle: deg, 
 				rotate: function(event, angle){
-					var deg = parseInt(angle.r);
+					var deg = Math.round(angle.r);
 					if(deg < 0) deg = 360 + deg;
 					
 					jQuery('#' + e.data('type') + '-rotate-value').val(deg);
@@ -3969,8 +3979,9 @@ var design={
 			$jd('.rotate-value').val(deg);
 		},
 		updateSize: function(w, h){
-			var e = design.item.get(),			
-				svg = e.find('svg'),
+			var e = design.item.get();
+			if(e.length == 0) return false;
+			var	svg = e.find('svg'),
 				view = svg[0].getAttributeNS(null, 'viewBox'),
 				width = svg[0].getAttributeNS(null, 'width'),
 				height = svg[0].getAttributeNS(null, 'height');
@@ -4677,10 +4688,7 @@ var design={
 								{
 									context.restore();
 								}
-								
 								canvasLoad(obj, i);
-								
-								
 							};
 							images.src = item.src;
 						}
@@ -4691,9 +4699,7 @@ var design={
 							images.onload = function() {
 								context.drawImage(images, item.left, item.top);
 								context.restore();
-								
 								canvasLoad(obj, i);
-								
 							};
 							images.src = mySrc;
 						}
@@ -4727,8 +4733,7 @@ var design={
 						
 			design.output[postion] = canvas;
 			
-			var layers 	= eval ("(" + items["design"][index][postion] + ")");	
-					
+			var layers 	= eval ("(" + items["design"][index][postion] + ")");			
 			var count = Object.keys(layers).length;
 				count = parseInt(count) - 1;
 			var z = layers[1].zIndex;
@@ -4742,14 +4747,11 @@ var design={
 			canvasLoad(obj, 0);
 			function canvasLoad(obj, i)
 			{
-				//var index = i;
-				//console.log(i);
-				
 				if (typeof obj[i] != 'undefined')
 				{
 					var layer = obj[i];
 					i++;
-					//console.log(layer);
+					
 					if (layer.id != 'area-design')
 					{
 						var imageObj = new Image();
@@ -4758,14 +4760,12 @@ var design={
 						var width 	= design.convert.px(layer.width);
 						var height 	= design.convert.px(layer.height);
 						imageObj.onload = function(){
-							
 							context.save();
 							context.drawImage(imageObj, left, top, width, height);
 							context.restore();
 							if(i>1){
 								canvasLoad(obj, i);
 							}
-							
 						}
 						imageObj.onerror = function(){
 							if(i>1){
@@ -4811,7 +4811,9 @@ var design={
 							ctx.drawImage(canvas1, tmpRect.left, tmpRect.top, canvas1.width, canvas1.height, 0, 0, tmpRect.width, tmpRect.height);
 							design.output[postion + 'nobg'] = can;
 						}
-						canvasLoad(obj, i);
+						if(i>1){
+								canvasLoad(obj, i);
+							}
 					}
 				}
 				else

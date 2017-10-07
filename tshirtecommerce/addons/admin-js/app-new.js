@@ -373,7 +373,7 @@ jQuery(document).on('select.item.design', function(event, e){
 		item.rotatable({
 			angle: deg, 
 			rotate: function(event, angle){
-				var deg = parseInt(angle.r);
+				var deg = Math.round(angle.r);
 				if(deg < 0) deg = 360 + deg;
 				jQuery('#' + type + '-rotate-value').val(deg);
 				jQuery(e).data('rotate', deg);

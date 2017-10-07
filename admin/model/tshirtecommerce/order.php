@@ -1,23 +1,44 @@
 <?php
 /**
  * @author 		tshirtecommerce - https://tshirtecommerce.com
- * @date 		June, 16, 2016
+ * @date 		Aug 31, 2017
  * 
- * API 			4.1.3
+ * API 			4.2.0
  * 
  * @copyright  	Copyright (C) 2015 https://tshirtecommerce.com. All rights reserved.
  * @license    	GNU General Public License version 2 or later; see LICENSE
  *
  */
 
-class ModelTshirtecommerceOrder extends Model {
+class ModelTshirtecommerceOrder extends Model
+{
+	public function validCampaign($product_id)
+	{
+		// Check install campaign
+		$query = $this->db->query('DESCRIBE `'.DB_PREFIX.'product`');
+		$is_campaign = 0;
+		foreach ($query->rows as $column) {
+			if ($column['Field'] == 'author') {
+				$is_campaign = 1;
+			}
+		}
+
+		if ($is_campaign == 0) return 0;
+
+		$query = $this->db->query('SELECT `author` FROM `'.DB_PREFIX.'product` WHERE `product_id` = '.(int)$product_id);
+		if ($query->num_rows) {
+			if ($query->row['author'] > 0) return 1;
+		}
+
+		return 0;
+	}
 
 	public function getItem($order_product_id, $product_id = 0)
 	{	
 		$item = $this->db->query("
 			SELECT * 
 			FROM `".DB_PREFIX."tshirtdesign_order` 
-			WHERE order_product_id = '".(int)$order_product_id."'
+			WHERE order_product_id = '".(int)$order_product_id."' ORDER BY `id` DESC LIMIT 1
 		");
 		$design = '';
 		if ($item->num_rows) {
@@ -54,10 +75,10 @@ class ModelTshirtecommerceOrder extends Model {
 	{
 		$products = array();
 		$items = $this->db->query("
-			SELECT p.*, `name` 
-			FROM `".DB_PREFIX."product` as p, 
-				`".DB_PREFIX."product_description` as pd 
-			WHERE `status` = 1 AND p.`product_id` = pd.`product_id` AND `design_product_title_img` != ''
+			SELECT p.*, pd.`name` 
+			FROM `".DB_PREFIX."product` p 
+			LEFT JOIN `".DB_PREFIX."product_description` pd ON p.`product_id` = pd.`product_id`
+			WHERE p.`status` = 1 AND p.`design_product_id` <> '' AND pd.`language_id` = ".(int)$this->config->get('config_language_id')."
 		");
 		if ($items->num_rows) {
 			foreach ($items->rows as $item) {
@@ -171,19 +192,47 @@ class ModelTshirtecommerceOrder extends Model {
 		}
 	}
 
-	protected function openURL($url)
+	protected function fnStrtolower($str)
 	{
-		$data = false;
-		if (function_exists('curl_exec')) {
-			$ch = @curl_init();
-			curl_setopt($ch, CURLOPT_URL, $url);
-			curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-			$data = @curl_exec($ch);
-			@curl_close($ch);
-		}		
-		if ($data == false && function_exists('file_get_contents')) $data = @file_get_contents($url);
+		if (is_array($str)) {
+	            return false;
+	        }
+	        if (function_exists('mb_strtolower')) {
+	            return mb_strtolower($str, 'utf-8');
+	        }
+	        return strtolower($str);
+	}
 
-		return $data;
+	protected function openURL($url, $use_include_path = false, $stream_context = null, $curl_timeout = 5)
+	{
+	    if ($stream_context == null && preg_match('/^https?:\/\//', $url)) {
+	        $stream_context = @stream_context_create(array('http' => array('timeout' => $curl_timeout)));
+	    }
+	    if (in_array(ini_get('allow_url_fopen'), array('On', 'on', '1')) || !preg_match('/^https?:\/\//', $url)) {
+	        return @file_get_contents($url, $use_include_path, $stream_context);
+	    } elseif (function_exists('curl_init')) {
+	        $curl = curl_init();
+	        curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+	        curl_setopt($curl, CURLOPT_URL, $url);
+	        curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 5);
+	        curl_setopt($curl, CURLOPT_TIMEOUT, $curl_timeout);
+	        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, 0);
+	        if ($stream_context != null) {
+	            $opts = stream_context_get_options($stream_context);
+	            if (isset($opts['http']['method']) && $this->fnStrtolower($opts['http']['method']) == 'post') {
+	                curl_setopt($curl, CURLOPT_POST, true);
+	                if (isset($opts['http']['content'])) {
+	                    parse_str($opts['http']['content']);
+	                    curl_setopt($curl, CURLOPT_POSTFIELDS, array());
+	                }
+	            }
+	        }
+	        $content = curl_exec($curl);
+	        curl_close($curl);
+	        return $content;
+	    } else {
+	        return false;
+	    }
 	}
 
 	protected function store_str_svg($svg, $key)
@@ -232,4 +281,340 @@ class ModelTshirtecommerceOrder extends Model {
 		}
 		return $res;
 	}
+
+	public function rtrimString($str, $str_search)
+    {
+        $length_str = strlen($str_search);
+        if (strlen($str) >= $length_str && substr($str, -$length_str) == $str_search) {
+            $str = substr($str, 0, -$length_str);
+        }
+        return $str;
+    }
+
+    public function getPrintingType($print_type)
+    {
+    	if (!defined('DS')) define('DS', DIRECTORY_SEPARATOR);
+    	if (!defined('ROOT')) define('ROOT', dirname(DIR_SYSTEM).DS.'tshirtecommerce');
+
+    	include_once ROOT.DS.'includes'.DS.'functions.php';
+    	include_once ROOT.DS.DS.'includes'.DS.'addons.php';
+    	$dg = new dg();
+    	$addons = new addons();
+
+    	$print1 = $dg->getPrintingType($print_type);
+    	$print2 = array(
+			'screen'		=> $addons->__('settings_print_screen'),
+			'dtg'			=> $addons->__('settings_print_DTG'),
+			'sublimation'	=> $addons->__('settings_print_sublimation'),
+			'embroidery'	=> $addons->__('settings_print_embroidery'),
+		);
+		$print_types = array_merge((array)$print1, $print2);
+
+		$string = '';
+		if (count($print_types) > 0) {
+			foreach ($print_types as $key => $value) {
+				if (strtolower($print_type) == strtolower($key)) {
+					$string = $value;
+					break;
+				}
+			}
+		}
+
+    	return $string;
+    }
+
+	public function getOrderHistory($order_product_id, $parent_id)
+    {
+    	if (!defined('DS')) define('DS', DIRECTORY_SEPARATOR);
+    	if (!defined('ROOT')) define('ROOT', dirname(DIR_SYSTEM).DS.'tshirtecommerce');
+    	include_once ROOT.DS.'includes'.DS.'functions.php';
+    	$dg = new dg();
+
+    	if ($this->request->server['HTTPS']) {
+			$server = HTTPS_CATALOG;
+		} else {
+			$server = HTTP_CATALOG;
+		}
+		if (substr($server, -1) != '/') {
+			$server .= '/';
+		}
+
+    	$array = array();
+    	$this->load->language('extension/module/tshirtecommerce');
+
+    	$json = array();
+    	$query = $this->db->query('SELECT `options` FROM `'.DB_PREFIX.'tshirtdesign_order` WHERE `order_product_id`='.(int)$order_product_id);
+
+    	if ($query->num_rows) {
+    		$json = json_decode($query->row['options'], true);
+    	}
+
+    	if (isset($json['options']) && count($json['options']) > 0)
+    		$json = $json['options'];
+
+    	if (count($json) > 0) {
+    		// for cart
+    		if (isset($json['rowid']) && !empty($json['rowid']) && $json['refer'] == 'designer') {
+    			// Set design color for options
+	    		if (isset($json['colors']) && count($json['colors']) > 0) {
+	    			$temp['name'] = $this->language->get('text_cart_color');
+	    			$html = '';
+	    			if (count($json['colors']) > 1) {
+	    				$html .= '<label style="line-height: 20px;"><span style="float: left;display: inline-block;width: 20px;height: 20px;overflow: hidden;border: 1px solid #d4d4d4;margin-right: 5px;">';
+						foreach ($json['colors'] as $h) {
+							$html .= '<span style="width: 18px;height: 18px;float: left;display: inline-block;background-color: #'.$h.'; width: '.(100 / count($json['colors'])).'%"></span>';
+						}
+						$html .= '</span>'.$json['color_title'].'</label>';
+	    			} else {
+	    				$html .= '<label style="line-height: 20px;"><span style="float: left;display: inline-block;width: 20px;height: 20px;overflow: hidden;border: 1px solid #d4d4d4;margin-right: 5px;background-color:#'.$json['color_hex'].'"></span>'.$json['color_title'].'</label>';	
+	    			}
+	    			$temp['value'] = $html;
+	    			$temp['type'] = 'text';
+	    			$array[] = $temp;
+	    		}
+
+	    		// Render teams and numbers
+		    	if (isset($json['teams']) && count($json['teams'])) {
+		    		$temp['name'] = $this->language->get('text_cart_team_number');
+		    		$html = '<br/><table style="width:100%; border: 1px solid #ddd;float: left;"><thead><tr><th style="border: 1px solid #ddd;">'.$this->language->get('text_cart_team_number_name').'</th><th style="border: 1px solid #ddd;">'.$this->language->get('text_cart_team_number_number').'</th><th style="border: 1px solid #ddd;">'.$this->language->get('text_cart_team_number_size').'</th></tr></thead><tbody>';
+		    		foreach ($json['teams']['name'] as $idx => $name) {
+		    			$str_size = isset($json['teams']['size'][$idx]) ? $json['teams']['size'][$idx] : '';
+		    			$size = '';
+		    			if (!empty($str_size)) {
+		    				$sizes = explode('::', $str_size);
+		    				$size = isset($sizes[0]) ? $sizes[0] : '';
+		    			}
+		    			$number = isset($json['teams']['number'][$idx]) ? $json['teams']['number'][$idx] : '';
+		    			$html .= '<tr><td style="border: 1px solid #ddd;">'.$name.'</td><td style="border: 1px solid #ddd;">'.$number.'</td><td style="border: 1px solid #ddd;">'.$size.'</td></tr>';
+		    		}
+		    		$html .= '</tbody></table>';
+		    		$temp['value'] = $html;
+	    			$temp['type'] = 'text';
+	    			$array[] = $temp;
+		    	}
+
+    			// Set design attributes for options
+    			if (isset($json['options']) && count($json['options'])) {
+    				foreach ($json['options'] as $row) {
+    					$temp['name'] = $row['name'];
+    					switch ($row['type']) {
+    						case 'selectbox':
+    						case 'radio':
+    						case 'printing':
+    							$temp['value'] = $row['value'];
+    							$temp['type'] = ($row['type'] == 'printing') ? 'text' : $row['type'];
+    							break;
+
+    						case 'textlist':
+    							if (count($row['value']) > 0) {
+    								$temp['value'] = '';
+    								$temp['type'] = 'text';
+    								foreach ($row['value'] as $k => $r) {
+    									$temp['value'] .= $k.' - '.$r.'; ';
+    								}
+    							}
+    							break;
+
+    						case 'checkbox':
+    							if (count($row['value']) > 0) {
+    								$temp['value'] = '';
+    								$temp['type'] = 'checkbox';
+    								foreach ($row['value'] as $r) {
+    									$temp['value'] .= $r.'; ';
+    								}
+    							}
+    							break;
+    						
+    						default:
+    							break;
+    					}
+    					$array[] = $temp;
+    				}
+    			}
+
+    			// Set design images to options
+    			if (isset($json['images']) && !empty($json['images'])) {
+    				$images = json_decode(str_replace('&quot;', '"', $json['images']), true);
+    				if (count($images) > 0) {
+    					$temp['name'] = $this->language->get('text_cart_images');
+    					$temp['value'] = '<div style="width:100%;display:block;">';
+    					foreach ($images as $key => $img) {
+    						$image_link = $server.'tshirtecommerce/'.$img;
+    						$temp['value'] .= '<div style="padding:5px;float:left;"><a target="_blank" href="'.$image_link.'"><img width="90" height="90" src="'.$image_link.'" class="img-thumbnail" alt="'.$key.'" title="'.$key.'" /></a>';
+    						// Set link download if enabled
+    						
+    							$link_downlnoad = $server.'tshirtecommerce/design.php?key='.$json['rowid'].'&view='.$key;
+	    						$temp['value'] .= '</br><center><a href="'.$link_downlnoad.'" target="_blank">'.$this->language->get('text_cart_download').'</a></center>';
+	    					
+	    					$temp['value'] .= '</div>';
+    					}
+    					$temp['type'] = 'text';
+    					$temp['value'] .= '</div><div style="clear:both"></div>';
+    					$array[] = $temp;
+    				}
+    			}
+
+    			// set edit design link to option
+		    	$cache = $dg->cache('cart');
+		    	$design = $cache->get($json['rowid']);
+
+    			$array[] = array(
+    				'name' => $this->language->get('text_cart_view_design'),
+    				'type' => 'text',
+    				'value' => '<a href="'.$server.'index.php?route=tshirtecommerce/designer&parent_id='.$parent_id.'&product_id='.$design['item']['product_id'].'&cart_id='.$json['rowid'].'" target="_blank">'.$this->language->get('text_cart_view_design_text').'</a>'
+    			);
+    		}
+
+    		// for admin or design
+    		if (!isset($json['rowid']) && isset($json['refer']) && $json['refer'] == 'product' && isset($json['design_product_id']) && !empty($json['design_product_id'])) {
+    			$product_id = $json['design_product_id'];
+
+    			$strs = explode(':', $json['design_product_id']);
+    			if (count($strs) > 1) {
+    				$product_id = $strs['2'];
+    			}
+    			
+    			$product = array();
+
+    			$file = ROOT.'/data/products.json';
+				if (is_file($file) && file_exists($file)) {
+					$json_products = json_decode($this->openUrl($file), true);
+				}
+
+				if ($json_products != false && isset($json_products['products']) && count($json_products['products']) > 0) {
+					foreach ($json_products['products'] as $row) {
+						if ($row['id'] == $product_id) {
+							$product = $row;
+							break;
+						}
+					}
+				}
+
+				$str_color = isset($strs['3']) ? $strs['3'] : '';
+				if (isset($json['colors'])) {
+					$str_color = implode(';', $json['colors']);
+				}
+
+				$str_color = $this->rtrimString($str_color, ';');
+
+				$new_design_product_id = $json['design_product_id'];
+				if (isset($strs['3']) && !empty($strs['3'])) {
+					$new_design_product_id = str_replace($strs['3'], $str_color, $json['design_product_id']);
+				}
+
+				// Set color to options
+				if (isset($product['design']) && isset($product['design']['color_hex']) && count($product['design']['color_hex']) > 0) {
+					$temp['name'] = $this->language->get('text_cart_color');
+					$temp['value'] = '';
+					foreach ($product['design']['color_hex'] as $idx => $hex) {
+						if (strtolower($hex) == strtolower($str_color)) {
+							$arr = explode(';', $str_color);
+							if (count($arr) > 1) {
+								$temp['value'] .= '<label style="line-height: 20px;"><span style="float: left;display: inline-block;width: 20px;height: 20px;overflow: hidden;border: 1px solid #d4d4d4;margin-right: 5px;">';
+								foreach ($arr as $h) {
+									$temp['value'] .= '<span style="width: 18px;height: 18px;float: left;display: inline-block;background-color: #'.$h.'; width: '.(100 / count($jarr)).'%"></span>';
+								}
+								$temp['value'] .= '</span>'.$product['design']['color_title'][$idx].'</label>';
+							} else {
+								$temp['value'] .= '<label style="line-height: 20px;"><span style="float: left;display: inline-block;width: 20px;height: 20px;overflow: hidden;border: 1px solid #d4d4d4;margin-right: 5px;background-color:#'.$hex.'"></span>'.$product['design']['color_title'][$idx].'</label>';
+							}
+							break;
+						}
+					}
+					$temp['type'] = 'text';
+					$array[] = $temp;
+				}
+
+				// set the printing to options
+				if (isset($product['print_type']) && !empty($product['print_type'])) {
+					$temp['name'] = $this->language->get('text_cart_print_type');
+					$temp['value'] = $this->getPrintingType($product['print_type']);
+					$temp['type'] = 'text';
+					$array[] = $temp;
+				}
+				//print_r($product);
+				// Set attributes to options
+				$attributes = isset($product['attributes']) ? $product['attributes'] : array();
+				if (isset($json['attribute']) && count($json['attribute']) > 0 && count($attributes) > 0) {
+					foreach ($json['attribute'] as $key => $value) {
+						if (isset($attributes['type'][$key])) {
+							$temp['name'] = $attributes['name'][$key];
+							$temp['value'] = '';
+							$type = isset($attributes['type'][$key]) ? $attributes['type'][$key] : '';
+							if (!empty($type)) {
+								switch ($type) {
+									case 'selectbox':
+									case 'radio':
+										$temp['value'] = $attributes['titles'][$key][$value];
+										$temp['type'] = $type;
+										break;
+
+									case 'textlist':
+										if (count($value) > 0) {
+											$temp['type'] = 'textlist';
+											foreach ($value as $k => $v) {
+												if (empty($v) || $v == '') $v = 0;
+												$temp['value'] .= $attributes['titles'][$key][$k].' - '.$v.'; ';
+											}
+										}
+										break;
+
+									case 'checkbox':
+										$temp['type'] = 'checkbox';
+										if (count($value) > 0) {
+											foreach ($value as $k => $v) {
+												$temp['value'] .= $attributes['titles'][$key][$k].'; ';
+											}
+										}
+										break;
+									
+									default:
+										break;
+								}
+							}
+							$array[] = $temp;
+						}
+					}
+				}
+
+    			// Set download link to options if enabled
+    			if (count($strs) > 1) {
+    				$temp['name'] = $this->language->get('text_cart_download');
+    				$temp['type'] = 'text';
+    				$temp['value'] = '';
+    				if (isset($product['design']) && isset($product['design']['params'])) {
+    					if (isset($product['design']['params']['front']) && !empty($product['design']['params']['front'])) {
+							$temp['value'] .= '<a href="'.$server.'tshirtecommerce/design.php?idea=1&key='.$new_design_product_id.'&view=front" target="_blank">'.$this->language->get('text_download_front').'</a>';
+						}
+
+						if (isset($product['design']['params']['back']) && !empty($product['design']['params']['back'])) {
+							if (isset($product['design']['params']['front']) && !empty($product['design']['params']['front'])) $temp['value'] .= ' - ';
+							$temp['value'] .= '<a href="'.$server.'tshirtecommerce/design.php?idea=1&key='.$new_design_product_id.'&view=back" target="_blank">'.$this->language->get('text_download_back').'</a>';
+						}
+
+						if (isset($product['design']['params']['left']) && !empty($product['design']['params']['left'])) {
+							if (isset($product['design']['params']['back']) && !empty($product['design']['params']['back'])) $temp['value'] .= ' - ';
+							$temp['value'] .= '<a href="'.$server.'tshirtecommerce/design.php?idea=1&key='.$new_design_product_id.'&view=left" target="_blank">'.$this->language->get('text_download_left').'</a>';
+						}
+						
+						if (isset($product['design']['params']['right']) && !empty($product['design']['params']['right'])) {
+							if (isset($product['design']['params']['left']) && !empty($product['design']['params']['left'])) $temp['value'] .= ' - ';
+							$temp['value'] .= '<a href="'.$server.'tshirtecommerce/design.php?idea=1&key='.$new_design_product_id.'&view=right" target="_blank">'.$this->language->get('text_download_right').'</a>';
+						}
+					}
+    				$array[] = $temp;
+    			}
+
+    			if (count($strs) > 1) {
+	    			$array[] = array(
+	    				'name' => $this->language->get('text_cart_view_design'),
+	    				'type' => 'text',
+	    				'value' => '<a href="'.$server.'index.php?route=tshirtecommerce/designer&parent_id='.$parent_id.'&product_id='.$new_design_product_id.'" target="_blank">'.$this->language->get('text_cart_view_design_text').'</a>'
+	    			);
+    			}
+    		}
+    	}
+
+    	return $array;
+    }
 }

@@ -141,7 +141,7 @@ if ( ! defined('ROOT')) exit('No direct script access allowed');
 <script type="text/javascript">
 var base_url 	= '<?php echo str_replace('admin/', '', site_url()); ?>';
 var fonts 	= [];
-var fonts_added 	= '<?php echo $data['fonts']; ?>';
+var fonts_added 	=  '<?php echo str_replace("'", "", $data['fonts']); ?>';
 var page 	= 0;
 jQuery(document).ready(function() {
 	dgUI.product.fonts.ajax(0);

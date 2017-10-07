@@ -582,7 +582,7 @@ input#idea-keyword{border-right:0}
 span.idea-sort{padding-left:8px}
 #dag-list-store-arts{overflow:auto}
 #dag-list-arts,.dag-art-store.main-clipart,.dag-art-shop.main-clipart{margin-right:-15px}
-#dag-list-arts .box-art a img{display:block;height:auto;max-height: 100%;max-width:100%;margin-left:auto;margin-right:auto}
+#dag-list-arts .box-art a img{display:block;height:auto;max-height: 100%;max-width:100%;margin:auto;position:absolute;top:0px;right:0px;left:0px;bottom:0px;}
 @media screen and (max-width: 770px) {
 #dag-list-arts,.dag-art-store.main-clipart,.dag-art-shop.main-clipart{margin-right:0}
 #dg-cliparts .form-inline .form-group{display:inline-block;margin-bottom:0;vertical-align:middle}

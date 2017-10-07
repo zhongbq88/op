@@ -166,7 +166,7 @@ $product->hide_quickview = 1;
 	
 	<?php echo $dg->theme('header', $product); ?>
 </head>
-<body>	
+<body class="design-mobile">	
 	<div class="container-fluid">
 		<div id="dg-wapper" class="col-md-12">
 			<div class="alert alert-danger" id="designer-alert" role="alert" style="display:none;"></div>

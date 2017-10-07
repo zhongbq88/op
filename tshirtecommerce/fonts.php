@@ -65,7 +65,7 @@ if (isset($_GET['name']) && isset($_GET['type']))
 		if ($font_type == 'google')
 		{
 			$font_name = str_replace(' ', '+', $font_name);
-			$url = 'http://fonts.googleapis.com/css?family='.$font_name;
+			$url = 'http://fonts.googleapis.com/css?family='.$font_name.'&subset=cyrillic,cyrillic-ext,greek,greek-ext,latin,latin-ext,vietnamese';
 			$data = openURL($url);
 			
 			if ($data === false)

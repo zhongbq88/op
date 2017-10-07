@@ -29,6 +29,10 @@ class Uploader
 	
 	// set path upload
 	function setDir($path){
+		if(!is_dir($path))
+		{
+			mkdir($path, 755);
+		}
 		$this->destinationPath  =   $path;
 		$this->allowAll =   false;
 	}

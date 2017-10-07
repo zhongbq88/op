@@ -315,20 +315,18 @@ function openURL($url, $use_include_path = false, $stream_context = null, $curl_
         curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 5);
         curl_setopt($curl, CURLOPT_TIMEOUT, $curl_timeout);
         curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, 0);
-
         if ($stream_context != null) {
-            $opts = stream_context_get_options($stream_context);
-
-            if (isset($opts['http']['method']) && Tools::strtolower($opts['http']['method']) == 'post') {
-                curl_setopt($curl, CURLOPT_POST, true);
-
-                if (isset($opts['http']['content'])) {
-                    parse_str($opts['http']['content'], $post_data);
-                    curl_setopt($curl, CURLOPT_POSTFIELDS, $post_data);
-                }
-            }
-        }
-
+			$opts = stream_context_get_options($stream_context);
+			if (isset($opts['http']['method']) && astrtolower($opts['http']['method']) == 'post')
+			{
+				curl_setopt($curl, CURLOPT_POST, true);
+				if (isset($opts['http']['content']))
+				{
+					parse_str($opts['http']['content'], $datas);
+					curl_setopt($curl, CURLOPT_POSTFIELDS, $datas);
+				}
+			}
+		}
         $content = curl_exec($curl);
         curl_close($curl);
 
@@ -336,6 +334,17 @@ function openURL($url, $use_include_path = false, $stream_context = null, $curl_
     } else {
         return false;
     }
+}
+
+function astrtolower($str)
+{
+	if (is_array($str)) {
+        return false;
+    }
+    if (function_exists('mb_strtolower')) {
+        return mb_strtolower($str, 'utf-8');
+    }
+    return strtolower($str);
 }
 
 exit;

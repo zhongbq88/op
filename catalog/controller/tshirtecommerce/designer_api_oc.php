@@ -1,9 +1,9 @@
 <?php 
 /**
  * @author 		tshirtecommerce - https://tshirtecommerce.com
- * @date 		July, 05, 2016
+ * @date 		September 13, 2017
  * 
- * API  		4.1.3
+ * API  		4.2.0
  * 
  * @copyright  	Copyright (C) 2015 https://tshirtecommerce.com. All rights reserved.
  * @license    	GNU General Public License version 2 or later; see LICENSE
@@ -16,10 +16,7 @@ class ControllerTshirtecommerceDesignerApiOc extends Controller
 	private $plus 	= '+';
 	private $minus 	= '-';
 
-	public function index() 
-	{
-
-	}
+	public function index() {}
 
 	public function get_mim_max()
 	{
@@ -69,13 +66,16 @@ class ControllerTshirtecommerceDesignerApiOc extends Controller
 				foreach ($option_values as $option_value) {
 					if (!$option_value['subtract'] || ($option_value['quantity'] > 0)) {
 						if (($this->config->get('config_customer_price') || !$this->config->get('config_customer_price')) && (float)$option_value['price']) {
-							$_price_tax = $this->tax->calculate($option_value['price'], $product_info['tax_class_id'], $this->config->get('config_tax') ? 'P' : false);
+							$price_no_tax = $option_value['price'];
+							if ($this->config->get('tshirtecommerce_allow_taxes') == 1 && isset($product_info['tax_class_id'])) {
+								$option_value['price'] = $this->tax->calculate($option_value['price'], $product_info['tax_class_id'], $this->config->get('config_tax') ? 'P' : false);
+							}
 							$_price = $option_value['price'];
-							$price = $this->currency->format($_price, $this->session->data['currency']);
+							$price = $this->currency->format($option_value['price'], $this->session->data['currency']);
 						} else {
 							$price = false;
 							$_price = false;
-							$_price_tax = false;
+							$price_no_tax = false;
 						}
 						
 						$product_option_value_data[] = array(
@@ -85,7 +85,7 @@ class ControllerTshirtecommerceDesignerApiOc extends Controller
 							'image' => $this->model_tool_image->resize($option_value['image'], 50, 50),
 							'price' => $price,
 							'_price' => $_price,
-							'_price_tax' => $_price_tax,
+							'price_no_tax' => $price_no_tax,
 							'price_prefix' => $option_value['price_prefix']
 						);
 					}
@@ -118,7 +118,23 @@ class ControllerTshirtecommerceDesignerApiOc extends Controller
 		$button_upload = $this->language->get('button_upload');
 
 		// Get base url
-		$site_url = (isset($this->request->server['HTTPS']) && (($this->request->server['HTTPS'] == 'on') || ($this->request->server['HTTPS'] == '1'))) ? $this->config->get('config_ssl') : $this->config->get('config_url');
+		if ($this->request->server['HTTPS']) {
+			$site_url = $this->config->get('config_ssl');
+		} else {
+			$site_url = $this->config->get('config_url');
+		}
+		// For mutiple store
+		$this->load->model('setting/store');
+		$stores = $this->model_setting_store->getStores();
+		if (count($stores) > 1) {
+			$store_id = $this->config->get('config_store_id');
+			foreach ($stores as $store) {
+				if ($store_id == $store['store_id']) {
+					$site_url = $this->request->server['HTTPS'] ? $store['ssl'] : $store['url'];
+					break;
+				}
+			}
+		}
 
 		$html = '';
 		// Add style and javascript for datetimepicker
@@ -129,14 +145,10 @@ class ControllerTshirtecommerceDesignerApiOc extends Controller
 		$html .= '<script>var _site_url = "'.$site_url.'";</script>';
 		$html .= '<script src="'.$site_url.'/tshirtecommerce/assets/js/opencart.js" type="text/javascript"></script>';
 		$html .= '<div class="content-y"><form method="post" id="oc_tool_cart" name="oc_tool_cart" action="">';
+		$html .= '<input type="hidden" name="refer" value="designer" />';
 		$html .= '<input type="hidden" id="product_id_oc" name="product_id_oc" value="'.$product_id.'" />';
 
 		$options = $this->get_options_oc($product_id);
-		$tax = $this->config->get('tshirtecommerce_allow_taxes');
-		$has_tax = false;
-		if ($tax === null || $tax == 1) {
-			$has_tax = true;
-		} 
 
 		if (count($options) > 0) {
 			foreach ($options as $option) {
@@ -147,15 +159,9 @@ class ControllerTshirtecommerceDesignerApiOc extends Controller
 	                $html .= '<option value="">'.$text_select.'</option>';
             		foreach ($option['product_option_value'] as $option_value) {
                 		$html .= '<option value="'.$option_value['product_option_value_id'].'">'.$option_value['name'];
-                		//if ($has_tax) {
-                		//	if ($option_value['_price_tax']) {
-	                	//		$html .= '('.$option_value['price_prefix'].$option_value['_price_tax'].')';
-	                	//	}
-                		//} else {
-                			if ($option_value['price']) {
-	                			$html .= '('.$option_value['price_prefix'].$option_value['price'].')';
-	                		}
-                		//}
+            			if ($option_value['price']) {
+                			$html .= '('.$option_value['price_prefix'].$option_value['price'].')';
+                		}
                 		$html .= '</option>';
             		}
 	              	$html .= '</select>';
@@ -170,15 +176,9 @@ class ControllerTshirtecommerceDesignerApiOc extends Controller
 		                $html .= '<label>';
 		                $html .= '<input type="radio" name="option_oc['.$option['product_option_id'].']" value="'.$option_value['product_option_value_id'] .'" onchange="design.ajax.getPrice()" />';
 		                $html .= $option_value['name'];
-		               	//if ($has_tax) {
-                		//	if ($option_value['_price_tax']) {
-	                	//		$html .= '('.$option_value['price_prefix'].$option_value['_price_tax'].')';
-	                	//	}
-                		//} else {
-                			if ($option_value['price']) {
-	                			$html .= '('.$option_value['price_prefix'].$option_value['price'].')';
-	                		}
-                		//}
+            			if ($option_value['price']) {
+                			$html .= '('.$option_value['price_prefix'].$option_value['price'].')';
+                		}
 		                $html .= '</label>';
 		                $html .= '</div>';
 	                }
@@ -195,19 +195,12 @@ class ControllerTshirtecommerceDesignerApiOc extends Controller
 		                $html .= '<input type="checkbox" name="option_oc['.$option['product_option_id'].'][]" value="'.$option_value['product_option_value_id']
 		                	.'" onchange="design.ajax.getPrice()" />';
 		                if ($option_value['image']) {
-		                    $html .= '<img src="'.$option_value['image'].'" alt="'.$option_value['name'].($option_value['price'] ? ' '
-		                    	.$option_value['price_prefix'].$option_value['price'] : '').'" class="img-thumbnail" />';
+		                    $html .= '<img src="'.$option_value['image'].'" alt="'.$option_value['name'].($option_value['price'] ? ' '.$option_value['price_prefix'].$option_value['price'] : '').'" class="img-thumbnail" />';
 		                }
 	                    $html .= $option_value['name'];
-	                    //if ($has_tax) {
-                		//	if ($option_value['_price_tax']) {
-	                	//		$html .= '('.$option_value['price_prefix'].$option_value['_price_tax'].')';
-	                	//	}
-                		//} else {
-                			if ($option_value['price']) {
-	                			$html .= '('.$option_value['price_prefix'].$option_value['price'].')';
-	                		}
-                		//}
+            			if ($option_value['price']) {
+                			$html .= '('.$option_value['price_prefix'].$option_value['price'].')';
+                		}
 		                $html .= '</label>';
 		                $html .= '</div>';
 		            }
@@ -222,17 +215,10 @@ class ControllerTshirtecommerceDesignerApiOc extends Controller
 		                $html .= '<div class="radio">';
 		                $html .= '<label>';
 		                $html .= '<input type="radio" name="option_oc['.$option['product_option_id'].']" value="'. $option_value['product_option_value_id'].'" />';
-		                $html .= '<img src="'.$option_value['image'] .'" alt="'.$option_value['name'].($option_value['price'] ? ' '
-		                	.$option_value['price_prefix'].$option_value['price'] : '').'" class="img-thumbnail" /> '. $option_value['name'];
-	                    //if ($has_tax) {
-                		//	if ($option_value['_price_tax']) {
-	                	//		$html .= '('.$option_value['price_prefix'].$option_value['_price_tax'].')';
-	                	//	}
-                		//} else {
-                			if ($option_value['price']) {
-	                			$html .= '('.$option_value['price_prefix'].$option_value['price'].')';
-	                		}
-                		//}
+		                $html .= '<img src="'.$option_value['image'] .'" alt="'.$option_value['name'].($option_value['price'] ? ' '.$option_value['price_prefix'].$option_value['price'] : '').'" class="img-thumbnail" /> '. $option_value['name'];
+            			if ($option_value['price']) {
+                			$html .= '('.$option_value['price_prefix'].$option_value['price'].')';
+                		}
 		                $html .= '</label>';
 		                $html .= '</div>';
 		            }
@@ -242,32 +228,27 @@ class ControllerTshirtecommerceDesignerApiOc extends Controller
 	            if ($option['type'] == 'text') {
 		            $html .= '<div class="form-group'.($option['required'] ? ' required' : '').'">';
 		            $html .= '<label class="control-label" for="input-option_oc'.$option['product_option_id'].'">'.$option['name'].'</label>';
-		            $html .= '<input type="text" name="option_oc['.$option['product_option_id'].']" value="'.$option['value'].'" placeholder="'
-		            	.$option['name'].'" id="input-option_oc'.$option['product_option_id'].'" class="form-control" />';
+		            $html .= '<input type="text" name="option_oc['.$option['product_option_id'].']" value="'.$option['value'].'" placeholder="'.$option['name'].'" id="input-option_oc'.$option['product_option_id'].'" class="form-control" />';
 		            $html .= '</div>';
 	            }
 	            if ($option['type'] == 'textarea') {
 		            $html .= '<div class="form-group'.($option['required'] ? ' required' : '').'">';
 		            $html .= '<label class="control-label" for="input-option_oc'.$option['product_option_id'].'">'.$option['name'].'</label>';
-		            $html .= '<textarea style="resize:none" name="option_oc['.$option['product_option_id'].']" rows="3" placeholder="'.$option['name']
-		            	.'" id="input-option_oc'.$option['product_option_id'].'" class="form-control">'.$option['value'].'</textarea>';
+		            $html .= '<textarea style="resize:none" name="option_oc['.$option['product_option_id'].']" rows="3" placeholder="'.$option['name'].'" id="input-option_oc'.$option['product_option_id'].'" class="form-control">'.$option['value'].'</textarea>';
 		            $html .= '</div>';
 	            }
 	            if ($option['type'] == 'file') {
 		            $html .= '<div class="form-group'.($option['required'] ? ' required' : '').'">';
 		            $html .= '<label class="control-label">'.$option['name'].'</label>';
-		            $html .= '<button type="button" id="button-upload'.$option['product_option_id'].'" data-loading-text="'.$text_loading
-		            	.'" class="btn btn-default btn-block"><i class="fa fa-upload"></i> '. $button_upload.'</button>';
-		            $html .= '<input type="hidden" name="option_oc['.$option['product_option_id'].']" value="" id="input-option_oc'
-		            	.$option['product_option_id'].'" />';
+		            $html .= '<button type="button" id="button-upload'.$option['product_option_id'].'" data-loading-text="'.$text_loading.'" class="btn btn-default btn-block"><i class="fa fa-upload"></i> '. $button_upload.'</button>';
+		            $html .= '<input type="hidden" name="option_oc['.$option['product_option_id'].']" value="" id="input-option_oc'.$option['product_option_id'].'" />';
 		            $html .= '</div>';
 	            }
 	            if ($option['type'] == 'date') {
 		            $html .= '<div class="form-group'.($option['required'] ? ' required' : '').'">';
 		            $html .= '<label class="control-label" for="input-option_oc'.$option['product_option_id'].'">'.$option['name'].'</label>';
 		            $html .= '<div class="input-group date">';
-		            $html .= '<input type="text" name="option_oc['.$option['product_option_id'].']" value="'.$option['value']
-		            	.'" data-date-format="YYYY-MM-DD" id="input-option_oc'.$option['product_option_id'].'" class="form-control" />';
+		            $html .= '<input type="text" name="option_oc['.$option['product_option_id'].']" value="'.$option['value'].'" data-date-format="YYYY-MM-DD" id="input-option_oc'.$option['product_option_id'].'" class="form-control" />';
 		            $html .= '<span class="input-group-btn">';
 		            $html .= '<button class="btn btn-default" type="button"><i class="fa fa-calendar"></i></button>';
 		            $html .= '</span></div>';
@@ -277,8 +258,7 @@ class ControllerTshirtecommerceDesignerApiOc extends Controller
 		            $html .= '<div class="form-group'.($option['required'] ? ' required' : '').'">';
 		            $html .= '<label class="control-label" for="input-option_oc'.$option['product_option_id'].'">'.$option['name'].'</label>';
 		            $html .= '<div class="input-group datetime">';
-		            $html .= '<input type="text" name="option_oc['.$option['product_option_id'].']" value="'.$option['value']
-		            	.'" data-date-format="YYYY-MM-DD HH:mm" id="input-option_oc'.$option['product_option_id'].'" class="form-control" />' ;
+		            $html .= '<input type="text" name="option_oc['.$option['product_option_id'].']" value="'.$option['value'].'" data-date-format="YYYY-MM-DD HH:mm" id="input-option_oc'.$option['product_option_id'].'" class="form-control" />' ;
 		            $html .= '<span class="input-group-btn">';
 		            $html .= '<button type="button" class="btn btn-default"><i class="fa fa-calendar"></i></button>';
 		            $html .= '</span></div>';
@@ -288,16 +268,15 @@ class ControllerTshirtecommerceDesignerApiOc extends Controller
 		            $html .= '<div class="form-group'.($option['required'] ? ' required' : '').'">';
 		            $html .= '<label class="control-label" for="input-option_oc'.$option['product_option_id'].'">'.$option['name'].'</label>';
 		            $html .= '<div class="input-group time">';
-		            $html .= '<input type="text" name="option_oc['.$option['product_option_id'].']" value="'.$option['value']
-		            	.'" data-date-format="HH:mm" id="input-option_oc'.$option['product_option_id'].'" class="form-control" /><span class="input-group-btn">';
+		            $html .= '<input type="text" name="option_oc['.$option['product_option_id'].']" value="'.$option['value'].'" data-date-format="HH:mm" id="input-option_oc'.$option['product_option_id'].'" class="form-control" /><span class="input-group-btn">';
 		            $html .= '<button type="button" class="btn btn-default"><i class="fa fa-calendar"></i></button>';
 		            $html .= '</span></div>';
 		            $html .= '</div>';
 	            }
 			}
-			if ($has_tax && isset($options[0]['taxes']) && $options[0]['taxes'] > 0) {
-            	$html .= "<p><label class='tshirtecommerce-taxes-oc' style='color: #F00'>Taxes: ".($options[0]['taxes']*100) ."%</label></p";
-            }
+			//if ($has_tax && isset($options[0]['taxes']) && $options[0]['taxes'] > 0) {
+            //	$html .= "<p><label class='tshirtecommerce-taxes-oc' style='color: #F00'>Taxes: ".($options[0]['taxes']*100) ."%</label></p";
+            //}
 		}
 		$html .= "</form></div>";
 
@@ -317,7 +296,6 @@ class ControllerTshirtecommerceDesignerApiOc extends Controller
 		$product_info = $this->model_catalog_product->getProduct($product_id);
 
 		if ($product_info) {
-			//$price = (!$this->config->get('config_customer_price')) ? $this->tax->calculate($product_info['price'], $product_info['tax_class_id'], $this->config->get('config_tax')) : 0;
 			$price = !$this->config->get('config_customer_price') ? $product_info['price'] : 0;
 
 			$product_discount_query = $this->db->query("
@@ -330,7 +308,6 @@ class ControllerTshirtecommerceDesignerApiOc extends Controller
 					AND (`date_end` = '0000-00-00' OR `date_end` > NOW())) 
 				ORDER BY `quantity` DESC, `priority` ASC, `price` ASC LIMIT 1
 			");
-			//$discount = $product_discount_query->num_rows ? $this->tax->calculate($product_discount_query->row['price'], $product_info['tax_class_id'], $this->config->get('config_tax')) : false;
 			$discount = $product_discount_query->num_rows ? $product_discount_query->row['price'] : false;
 
 			$product_special_query = $this->db->query("
@@ -341,11 +318,9 @@ class ControllerTshirtecommerceDesignerApiOc extends Controller
 					AND ((`date_start` = '0000-00-00' OR `date_start` < NOW()) 
 					AND (`date_end` = '0000-00-00' OR `date_end` > NOW())) 
 				ORDER BY `priority` ASC, `price` ASC LIMIT 1");
-			//$special = $product_special_query->num_rows ? $this->tax->calculate($product_special_query->row['price'], $product_info['tax_class_id'], $this->config->get('config_tax')) : false;
 			$special = $product_special_query->num_rows ? $product_special_query->row['price'] : false;
 
 			$product_price_old = $price;
-			//$product_price_sale = ((float)$product_info['special'] && $special !== false) ? $special : ((isset($discount) && $discount !== false) ? $discount : $price);
 			$product_price_sale = ((float)$product_info['special'] && $special !== false) ? $special : ((isset($discount) && $discount !== false) ? $discount : $price);
 		}
 
@@ -402,16 +377,16 @@ class ControllerTshirtecommerceDesignerApiOc extends Controller
 								foreach ($value['product_option_value'] as $op) {
 									// calc price
 									if ($val == $op['product_option_value_id']) {
-										if ($op['price_prefix'] == $this->minus) $price -= isset($op['_price']) ? $op['_price'] : 0;
-										else $price += isset($op['_price']) ? $op['_price'] : 0;
+										if ($op['price_prefix'] == $this->minus) $price -= isset($op['price_no_tax']) ? $op['price_no_tax'] : 0;
+										else $price += isset($op['price_no_tax']) ? $op['price_no_tax'] : 0;
 									}
 								}
 							}
 						} elseif ($value['type'] == 'radio' || $value['type'] == 'select') {
 							foreach ($value['product_option_value'] as $op) {
 								if ($option_val == $op['product_option_value_id']) {
-									if ($op['price_prefix'] == $this->minus) $price -= isset($op['_price']) ? $op['_price'] : 0;
-									else $price += isset($op['_price']) ? $op['_price'] : 0;
+									if ($op['price_prefix'] == $this->minus) $price -= isset($op['price_no_tax']) ? $op['price_no_tax'] : 0;
+									else $price += isset($op['price_no_tax']) ? $op['price_no_tax'] : 0;
 								}
 							}
 						}

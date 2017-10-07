@@ -38,8 +38,8 @@ $addons = $GLOBALS['addons'];
 						<i class="glyphicons soccer_ball"></i> <span><?php echo lang('designer_menu_name_number'); ?></span>
 					</a>
 				</li>
-				<li>
-					<a href="javascript:void(0);" class="add_item_mydesign" <?php echo cssShow($settings, 'show_my_design'); ?>>
+				<li <?php echo cssShow($settings, 'show_my_design'); ?>>
+					<a href="javascript:void(0);" class="add_item_mydesign">
 						<i class="glyphicons user"></i> <span><?php echo lang('designer_menu_my_design'); ?></span>
 					</a>
 				</li>				

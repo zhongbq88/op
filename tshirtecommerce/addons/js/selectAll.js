@@ -76,11 +76,11 @@ design.selectAll = function() {
 	{
 		return false;
 	}
-	if(itemLst.length == 1)
+	/*if(itemLst.length == 1)
 	{
 		design.item.select(itemLst[0]);
 		return false;
-	}
+	}*/
 	markArea.find('.snap-align-line-h').hide();
 	markArea.find('.snap-align-line-v').hide();
 	markArea.find('.mark-snap-item').hide();
@@ -462,6 +462,7 @@ design.changeColorAllItem = function(ele, color) {
 design.fitToAreaDesign = function() {
 	var ara     = jQuery('.labView.active .design-area');
 	var maskAll = jQuery('.labView.active').find('.mask-all-item');
+	if(maskAll.length == 0) return false;
 	var content = jQuery('.labView.active .design-area .content-inner');
 	var eleLst  = jQuery(content[0]).children('span');
 	var araRct  = ara[0].getBoundingClientRect();

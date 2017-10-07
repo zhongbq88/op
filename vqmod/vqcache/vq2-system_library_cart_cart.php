@@ -47,18 +47,6 @@ class Cart {
 
 				$option_data = array();
 
-				$temp_options = json_decode($cart['option'], true);
-				if (isset($temp_options['design'])) {
-					$design = $temp_options['design'];
-				} else {
-					$design = false;
-				}
-
-				if (!isset($design['rowid']) ) {
-					$design = false;
-				}
-			
-
 				foreach (json_decode($cart['option']) as $product_option_id => $value) {
 					$option_query = $this->db->query("SELECT po.product_option_id, po.option_id, od.name, o.type FROM " . DB_PREFIX . "product_option po LEFT JOIN `" . DB_PREFIX . "option` o ON (po.option_id = o.option_id) LEFT JOIN " . DB_PREFIX . "option_description od ON (o.option_id = od.option_id) WHERE po.product_option_id = '" . (int)$product_option_id . "' AND po.product_id = '" . (int)$cart['product_id'] . "' AND od.language_id = '" . (int)$this->config->get('config_language_id') . "'");
 
@@ -248,86 +236,20 @@ class Cart {
 				}
 
 
-				$tshirtecommerce_design = 0;
-				if ($design !== false) {
-					if (!defined('DS')) define('DS', DIRECTORY_SEPARATOR);
-			        if (!defined('ROOT')) define('ROOT', dirname(DIR_SYSTEM).DS.'tshirtecommerce');
-			        include_once(ROOT.'/includes/functions.php');
-			        $dg = new \dg();
-
-			        if (!is_numeric($design['rowid']) && isset($design['rowid']) && !empty($design['rowid'])) {
-			        	$rowid = $design['rowid'];
-			        	$cache = $dg->cache('cart');
-        				$tdesign = $cache->get($rowid);
-
-        				if ($tdesign != false && $tdesign != null) {
-	        				$tdata['colors'] = array($tdesign['color']);
-				            $tdata['product_id'] = $tdesign['item']['product_id'];
-				            $tdata['print'] = $tdesign['print'];
-				            $tdata['cliparts'] = $tdesign['cliparts'];
-			            } else {
-			            	$tdata['colors'] = isset($this->session->data[$rowid]['colors']) ? $this->session->data[$rowid]['colors'] : array();
-				            $tdata['product_id'] = isset($this->session->data[$rowid]['product_id']) ? $this->session->data[$rowid]['product_id'] : 0;
-				            $tdata['print'] = isset($this->session->data[$rowid]['print']) ? $this->session->data[$rowid]['print'] : array();
-				            $tdata['cliparts'] = isset($this->session->data[$rowid]['cliparts']) ? $this->session->data[$rowid]['cliparts'] : array();
-			            }
-			            $tdata['quantity'] = $cart['quantity'];
-			            $tdata['price_taxes'] = 0;
-			            $tdata['price_old_oc'] = $price;
-			            $tdata['price_sale_oc'] = $price;
-			            $tdata['attribute'] = array();
-			            $tdata['is_shopping_cart'] = 1;
-			           	if (isset($this->session->data[$rowid]) && isset($this->session->data[$rowid]['attribute'])) {
-			           		$tdata['attribute'] = $this->session->data[$rowid]['attribute'];
-			           	}
-			            $tdata['artStore'] = array();
-			            $evector = isset($tdesign['vector']) ? $tdesign['vector'] : '';
-			            if (!empty($evector)) {
-			                $json_evector = @json_decode($evector, true);
-			                if (count($json_evector)) {
-			                    foreach ($json_evector as $view => $items) {
-			                        if (count($items)) {
-			                            foreach ($items as $item) {
-			                                if (isset($item['clipar_type']) && $item['clipar_type'] == 'store') {
-			                                    $tdata['artStore'][] = $item['clipart_id'];
-			                                }
-			                            }
-			                        }
-			                    }
-			                }
-			            }
-			            $tshirtecommerce_prices = @$dg->prices($tdata, false);
-			        } else {
-			        	if (isset($design['rowid']) && isset($design['design_printing'])) {
-				        	$rowid = $design['rowid'];
-				        	$tdata['product_id'] = $design['rowid'];
-				        	$tdata['colors'] = array($design['color_hex']);
-				        	$tdata['quantity'] = $cart['quantity'];
-				        	$tdata['price_taxes'] = 0;
-				        	$tdata['price_old_oc'] = $price;
-				        	$tdata['price_sale_oc'] = $price;
-				            $tdata['attribute'] = $this->session->data[$rowid]['attribute'];
-				        	$tdata['artStore'] = array();
-				        	$tdata['print'] = array(
-				        		'sizes' => '{}',
-				        		'elements' => '{front: [], back: [], left: [], right: []}',
-				        		'colors' => '{front:[], back:[], left:[], right:[]}'
-				        	);
-				        	$tdata['print_type'] = $design['design_printing'];
-				        	$tshirtecommerce_prices = $dg->prices($tdata, false);
-			        	}
-			        }
-			        if (isset($tshirtecommerce_prices) && is_object($tshirtecommerce_prices)) {
-				        if (property_exists($tshirtecommerce_prices, 'item') && $tshirtecommerce_prices->item > 0) {
-			                $tshirtecommerce_design += $tshirtecommerce_prices->item - $price;
-			            } elseif (property_exists($tshirtecommerce_prices, 'printing') && $tshirtecommerce_prices->printing > 0) {
-			            	$tshirtecommerce_design += $tshirtecommerce_prices->printing;
-			            }
-			        }
+				/* vqmod/xml/tshirtecommerce_product.xml */
+				$tshirtecommerce_price = 0;
+				$tshirtecommerce_cart_options = json_decode($cart['option'], true);
+				if (isset($tshirtecommerce_cart_options['tshirtecommerce']) && count($tshirtecommerce_cart_options['tshirtecommerce'])) {
+					$tshirtecommerce = $tshirtecommerce_cart_options['tshirtecommerce'];
+					if (isset($tshirtecommerce['options']) && isset($tshirtecommerce['price_of_print']))
+						$tshirtecommerce_price = $tshirtecommerce['price_of_print'];
 				}
-				$option_price += $tshirtecommerce_design;
-			
+				$option_price += $tshirtecommerce_price;
+		
 				$product_data[] = array(
+
+				'tshirtecommerce' => isset($tshirtecommerce_cart_options['tshirtecommerce']) ? $tshirtecommerce_cart_options['tshirtecommerce'] : array(), /* vqmod/xml/tshirtecommerce_product.xml */
+		
 					'cart_id'         => $cart['cart_id'],
 					'product_id'      => $product_query->row['product_id'],
 					'name'            => $product_query->row['name'],
@@ -343,9 +265,6 @@ class Cart {
 					'price'           => ($price + $option_price),
 					'total'           => ($price + $option_price) * $cart['quantity'],
 					'reward'          => $reward * $cart['quantity'],
-
-				'design' => $design,
-			
 					'points'          => ($product_query->row['points'] ? ($product_query->row['points'] + $option_points) * $cart['quantity'] : 0),
 					'tax_class_id'    => $product_query->row['tax_class_id'],
 					'weight'          => ($product_query->row['weight'] + $option_weight) * $cart['quantity'],

@@ -43,13 +43,6 @@ design.text.baseencode = function(title, type, span){
 					defs.appendChild(style);
 					svg[0].appendChild(defs);
 				}
-				var safari = /safari/.test(navigator.userAgent.toLowerCase());
-				if (safari === true)
-				{
-						setTimeout(function(){
-							IOSFont(e);
-						}, 600);
-				}
 				
 				setTimeout(function(){
 					var rotate = e.data('rotate');
@@ -71,6 +64,11 @@ design.text.baseencode = function(title, type, span){
 					var y = (size2.top - size1.top) * arr[3] / $h;
 					txt[0].setAttributeNS(null, 'y', y);
 					e.css('transform', 'rotate('+rotate+'rad)');
+					var safari = /safari/.test(navigator.userAgent.toLowerCase());
+					if (safari === true)
+					{
+						IOSFont(e);
+					}
 					jQuery(document).triggerHandler( "beforechangefont.item.design", [$w, $h]);	
 				}, 1000);
 			}

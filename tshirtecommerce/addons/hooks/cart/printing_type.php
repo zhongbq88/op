@@ -14,10 +14,16 @@ $dg				= $GLOBALS['dg'];
 if (isset($data['print_type']))
 {
 	$printing = $dg->getPrintingType($data['print_type']);
-	if (isset($printing->title))
+	if (isset($printing->title)) {
 		$title	= $printing->title;
-	else
-		$title	= lang($data['print_type'], true);
+	}
+	else {
+		$print_type_text = lang($data['print_type'], true);
+		if ($print_type_text == null || empty($print_type_text))
+			$title	= $data['print_type'];
+		else
+			$title	= $print_type_text;
+	}
 	
 	$result = $params['result'];
 	$result->options[] = array(

@@ -973,14 +973,14 @@ function dispayCateTree($categories, $level = 0, $cate_checked = array() , $remo
 
 function imageURL($src)
 {
-	if ($src == '') return '';
-	
-	if (strpos($src, 'http') !== false)
-		return $src;
-	
 	$site_url 	= $GLOBALS['site_url'];
 	$url 		= str_replace('//tshirtecommerce', '/tshirtecommerce', $site_url);
 	$temp 		= explode('tshirtecommerce/', $url);
+
+	if ($src == '') return $temp[0].'/tshirtecommerce/admin/assets/images/no-image.jpg';
+	
+	if (strpos($src, 'http') !== false)
+		return $src;
 	
 	return $temp[0].'/tshirtecommerce/'.$src;
 }

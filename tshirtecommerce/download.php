@@ -13,7 +13,27 @@ error_reporting(0);
 ini_set('max_execution_time', 300);
 define('ROOT', dirname(__FILE__));
 define('DS', DIRECTORY_SEPARATOR);
-
+function openURL($url)
+{
+	$data = false;
+	if( function_exists('curl_exec') )
+	{
+		$ch = curl_init();
+		curl_setopt($ch, CURLOPT_URL, $url);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+		curl_setopt($ch, CURLOPT_VERBOSE, 1);
+      	curl_setopt($ch, CURLOPT_USERAGENT, 'User-Agent: curl/7.39.0');
+		$data = curl_exec($ch);
+		curl_close($ch);
+	}
+	
+	if( $data == false && function_exists('file_get_contents') )
+	{
+		$data = file_get_contents($url);
+	}
+	
+	return $data;
+}
 if ( isset($_GET['key']) && isset($_GET['view']) )
 {
 	$position 	= $_GET['view'];
@@ -112,56 +132,6 @@ if ( isset($_GET['key']) && isset($_GET['view']) )
 					$svg 		= '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" data-zoom="'.$zoom.'" height="'. $view->height .'" width="'.$view->width.'">';
 					$svgPNG 	= '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" data-zoom="'.$zoom.'" height="'. $view->height .'" width="'.$view->width.'">';
 					
-					/* add mask background. */
-					if ( isset($product->download_mask) && $product->download_mask == 1)
-					{						
-						$designProduct = $design->$position;
-						$elms = str_replace("'", '"', $designProduct[0]);
-						$elms = str_replace('["', '[', $elms);
-						$elms = str_replace('"]', ']', $elms);
-						$elms = json_decode($elms, true);
-						
-						$arr_elms = $elms;
-						$elmsort = array();
-						for($i = count($elms) - 1; $i >= 0; $i--)
-						{
-							$elmsort[] = $arr_elms[$i];
-						}
-						
-						if (isset($elmsort) && count($elmsort) > 0)
-						{
-							foreach($elmsort as $elm)
-							{
-								if(isset($elm['id']) && $elm['id'] == 'area-design')
-									break;
-								
-								if (isset($elm['ismask']) && $elm['ismask'] == 1)
-								{
-									$imgdata 	= $dg->openURL($elm['img']);
-									$file_name = 'data:image/PNG;base64,' . base64_encode($imgdata);
-									$mask_top = 0;
-									$mask_left = 0;
-									if((float) $view->top < (float) $elm['height'])
-									{
-										$mask_top = (float) $elm['top'] - $view->top;
-									}
-									if((float) $view->left < (float) $elm['width'])
-									{
-										$mask_left = (float) $elm['left'] - (float) $view->left;
-									}
-									
-									$svg .= '<svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" height="'.$elm['height'].'" width="'.$elm['width'].'" x="'.$mask_left.'px" y="'.$mask_top.'px">'
-											.'<image preserveAspectRatio="none" xlink:href="'.$file_name.'" height="'.$elm['height'].'" width="'.$elm['width'].'" y="0" x="0"/>'
-											.'</svg>';
-											
-									$svgPNG .= '<svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" height="'.$elm['height'].'" width="'.$elm['width'].'" x="'.$mask_left.'px" y="'.$mask_top.'px">'
-											.'<image preserveAspectRatio="none" xlink:href="'.$file_name.'" height="'.$elm['height'].'" width="'.$elm['width'].'" y="0" x="0"/>'
-											.'</svg>';
-								}
-							}
-						}
-					}
-					
 					// GET DESIGN OF ORDER
 					if(isset($data['vector']))
 					{
@@ -236,6 +206,9 @@ if ( isset($_GET['key']) && isset($_GET['view']) )
  						$item->svg 	= str_replace('xmlns:xml', 'xmlns:xlink', $item->svg); 	// IF IE
 						$item->svg 	= str_replace(' xmlns:xlink ', ' ', $item->svg); 	// IF IE
 						$item->svg 	= str_replace('viewBox=""', '', $item->svg); 	// IF IE
+
+						$item->svg 	= str_replace('url(#affTextFilteritem-0)', 'url(#affTextFilteritem-'.$item->id.')', $item->svg);
+						$item->svg 	= str_replace('id="affTextFilteritem-0"', 'id="affTextFilteritem-'.$item->id.'"', $item->svg);
 						
 						$count = explode('xmlns:xlink="http://www.w3.org/1999/xlink"', $item->svg);
 						if (count($count) > 2)
@@ -281,12 +254,12 @@ if ( isset($_GET['key']) && isset($_GET['view']) )
 											$link = $dg->url() .'tshirtecommerce'. $temp[1];
 										}											
 									}
-									$data 	= $dg->openURL($link);
+									$data_img 	= openURL($link);
 									if(isset($item->onecolor) && $item->onecolor != '')
 									{
-										$data = $dg->photoColor($data, $item->onecolor);
+										$data_img = $dg->photoColor($data_img, $item->onecolor);
 									}
-									$base64 = 'data:image/PNG;base64,' . base64_encode($data);
+									$base64 = 'data:image/PNG;base64,' . base64_encode($data_img);
 									$temp = explode($links[1][0], $item->svg);
 									if (isset($temp[1]))
 									{
@@ -296,7 +269,11 @@ if ( isset($_GET['key']) && isset($_GET['view']) )
 							}
 						}						
 						$dom = new DOMDocument();
-						$dom->loadXML($item->svg, LIBXML_PARSEHUGE);
+						if (version_compare(LIBXML_VERSION, '20700', '>=')) {
+							$dom->loadXML($item->svg, LIBXML_PARSEHUGE);
+						} else {
+							$dom->loadXML($item->svg);
+						}
 						
 						// team
 						if($item->type == 'team')
@@ -454,53 +431,69 @@ if ( isset($_GET['key']) && isset($_GET['view']) )
 						}
 					}
 					
-					/* add mask top layer. */
+					// add mask
 					if ( isset($product->download_mask) && $product->download_mask == 1)
 					{						
 						$designProduct = $design->$position;
 						$elms = str_replace("'", '"', $designProduct[0]);
 						$elms = str_replace('["', '[', $elms);
 						$elms = str_replace('"]', ']', $elms);
-						$elms = json_decode($elms, true);
+						$elms = json_decode($elms);
 						
-						$arr_elms = $elms;
-						$elmsort = array();
-						for($i = count($elms) - 1; $i >= 0; $i--)
+						if (isset($elms) && count($elms) > 0)
 						{
-							$elmsort[] = $arr_elms[$i];
-						}
-						
-						if (isset($elmsort) && count($elmsort) > 0)
-						{
-							$check = false;
-							foreach($elmsort as $elm)
+							function cmp1($a, $b)
 							{
-								if (isset($elm['ismask']) && $elm['ismask'] == 1 && $check == true)
+								return $a['zIndex'] - $b['zIndex'];
+							}
+							$arr_temp = json_decode( json_encode($elms), true);
+							usort($arr_temp, 'cmp1');
+							$elms = json_decode( json_encode($arr_temp));
+
+							// get all options of addon product builder when customers change colors
+							if(isset($data['options']) && isset($data['options']['productColors']))
+							{
+								$productColors = $data['options']['productColors'];
+							}
+							else
+							{
+								$productColors = array();
+							}
+
+							foreach($elms as $elm)
+							{
+								if (isset($elm->ismask) && $elm->ismask == 1)
 								{
-									$imgdata 	= $dg->openURL($elm['img']);
-									$file_name = 'data:image/PNG;base64,' . base64_encode($imgdata);
+									if( isset($elm->obj) && isset($productColors[$elm->obj]) && isset($productColors[$elm->obj]['hex']) )
+									{
+										$attributes_load_color = 'class="set-colors" data-color="'.$productColors[$elm->obj]['hex'].'"';
+									}
+									else
+									{
+										$attributes_load_color	= '';
+									}
+									$data_img 	= openURL(str_replace('https', 'http', $elm->img));
+									$file_name = 'data:image/PNG;base64,' . base64_encode($data_img);
+
 									$mask_top = 0;
 									$mask_left = 0;
-									if((float) $view->top < (float) $elm['height'])
+									if((float) $view->top < (float) $elm->height)
 									{
-										$mask_top = (float) $elm['top'] - $view->top;
+										$mask_top = (float) $elm->top - $view->top;
 									}
-									if((float) $view->left < (float) $elm['width'])
+									if((float) $view->left < (float) $elm->width)
 									{
-										$mask_left = (float) $elm['left'] - (float) $view->left;
+										$mask_left = (float) $elm->left - (float) $view->left;
 									}
 									
-									$svg .= '<svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" height="'.$elm['height'].'" width="'.$elm['width'].'" x="'.$mask_left.'px" y="'.$mask_top.'px">'
-											.'<image preserveAspectRatio="none" xlink:href="'.$file_name.'" height="'.$elm['height'].'" width="'.$elm['width'].'" y="0" x="0"/>'
+									$svg .= '<svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" height="'.$elm->height.'" width="'.$elm->width.'" x="'.$mask_left.'px" y="'.$mask_top.'px">'
+											.'<image '.$attributes_load_color.' preserveAspectRatio="none" xlink:href="'.$file_name.'" height="'.$elm->height.'" width="'.$elm->width.'" y="0" x="0"/>'
 											.'</svg>';
 											
-									$svgPNG .= '<svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" height="'.$elm['height'].'" width="'.$elm['width'].'" x="'.$mask_left.'px" y="'.$mask_top.'px">'
-											.'<image preserveAspectRatio="none" xlink:href="'.$file_name.'" height="'.$elm['height'].'" width="'.$elm['width'].'" y="0" x="0"/>'
+									$svgPNG .= '<svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" height="'.$elm->height.'" width="'.$elm->width.'" x="'.$mask_left.'px" y="'.$mask_top.'px">'
+											.'<image '.$attributes_load_color.' preserveAspectRatio="none" xlink:href="'.$file_name.'" height="'.$elm->height.'" width="'.$elm->width.'" y="0" x="0"/>'
 											.'</svg>';
 								}
-								
-								if(isset($elm['id']) && $elm['id'] == 'area-design')
-									$check = true;
 							}
 						}
 					}
@@ -601,7 +594,11 @@ if ( isset($_GET['key']) && isset($_GET['view']) )
 					{
 						$dom = new DOMDocument;
 						
-						$dom->loadXML($svgPNG, LIBXML_PARSEHUGE);
+						if (version_compare(LIBXML_VERSION, '20700', '>=')) {
+							$dom->loadXML($svgPNG, LIBXML_PARSEHUGE);
+						} else {
+							$dom->loadXML($svgPNG);
+						}
 						
 						$books = $dom->getElementsByTagName('svg');
 						$check = false;

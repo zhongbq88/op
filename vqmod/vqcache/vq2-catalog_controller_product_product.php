@@ -3,17 +3,6 @@ class ControllerProductProduct extends Controller {
 	private $error = array();
 
 	public function index() {
-
-		// pavo version 2.2
-		$this->load->language('extension/module/themecontrol');
-		$data['objlang'] = $this->registry->get('language');
-		$data['ourl'] = $this->registry->get('url');
-
-		$config = $this->registry->get("config");
-		$data['sconfig'] = $config;
-		$data['themename'] = $config->get("theme_default_directory");
-		// end edit
-
 		$this->load->language('product/product');
 
 		$data['breadcrumbs'] = array();
@@ -231,145 +220,18 @@ class ControllerProductProduct extends Controller {
 			$this->document->addLink($this->url->link('product/product', 'product_id=' . $this->request->get['product_id']), 'canonical');
 			$this->document->addScript('catalog/view/javascript/jquery/magnific/jquery.magnific-popup.min.js');
 			$this->document->addStyle('catalog/view/javascript/jquery/magnific/magnific-popup.css');
-			$this->document->addScript('catalog/view/javascript/jquery/datetimepicker/moment.js');
+			$this->document->addScript('catalog/view/javascript/jquery/datetimepicker/moment/moment.min.js');
+			$this->document->addScript('catalog/view/javascript/jquery/datetimepicker/moment/moment-with-locales.min.js');
 			$this->document->addScript('catalog/view/javascript/jquery/datetimepicker/bootstrap-datetimepicker.min.js');
 			$this->document->addStyle('catalog/view/javascript/jquery/datetimepicker/bootstrap-datetimepicker.min.css');
 
 			$data['heading_title'] = $product_info['name'];
 
-			$data['text_select'] = $this->language->get('text_select');
-			$data['text_manufacturer'] = $this->language->get('text_manufacturer');
-			$data['text_model'] = $this->language->get('text_model');
-			$data['text_reward'] = $this->language->get('text_reward');
-			$data['text_points'] = $this->language->get('text_points');
-			$data['text_stock'] = $this->language->get('text_stock');
-			$data['text_discount'] = $this->language->get('text_discount');
-			$data['text_tax'] = $this->language->get('text_tax');
-			$data['text_option'] = $this->language->get('text_option');
 			$data['text_minimum'] = sprintf($this->language->get('text_minimum'), $product_info['minimum']);
-			$data['text_write'] = $this->language->get('text_write');
 			$data['text_login'] = sprintf($this->language->get('text_login'), $this->url->link('account/login', '', true), $this->url->link('account/register', '', true));
-			$data['text_note'] = $this->language->get('text_note');
-			$data['text_tags'] = $this->language->get('text_tags');
-			$data['text_related'] = $this->language->get('text_related');
-			$data['text_payment_recurring'] = $this->language->get('text_payment_recurring');
-			$data['text_loading'] = $this->language->get('text_loading');
 
-			$data['entry_qty'] = $this->language->get('entry_qty');
-			$data['entry_name'] = $this->language->get('entry_name');
-			$data['entry_review'] = $this->language->get('entry_review');
-			$data['entry_rating'] = $this->language->get('entry_rating');
-			$data['entry_good'] = $this->language->get('entry_good');
-			$data['entry_bad'] = $this->language->get('entry_bad');
-
-			$data['button_cart'] = $this->language->get('button_cart');
-			$data['button_wishlist'] = $this->language->get('button_wishlist');
-			$data['button_compare'] = $this->language->get('button_compare');
-			$data['button_upload'] = $this->language->get('button_upload');
-			$data['button_continue'] = $this->language->get('button_continue');
-
-
-				if (!defined('DS')) define('DS', DIRECTORY_SEPARATOR);
-				if (!defined('ROOT')) define('ROOT', dirname(DIR_SYSTEM).DS.'tshirtecommerce');
-
-				include_once ROOT.DS.'includes'.DS.'functions.php';
-				include_once ROOT.DS.'includes'.DS.'addons.php';
-				$addons = new addons();
-
-				$this->load->language('common/language');
-				$this->load->model('localisation/language');
-				$data['languages'] = array();
-				$results = $this->model_localisation_language->getLanguages();
-				foreach ($results as $result) {
-					if ($result['status']) {
-						$data['languages'][] = array(
-							'name' => $result['name'],
-							'code' => $result['code'],
-							'tshirtecommerce_custom_text' => 'Custom Your Design'
-						);
-					}
-				}
-				$tshirtecommerce_customize_design_text = $this->config->get('tshirtecommerce_customize_design_text');
-				if (null !== $tshirtecommerce_customize_design_text && !empty($tshirtecommerce_customize_design_text)) {
-					if (!is_array($tshirtecommerce_customize_design_text)) {
-						$tshirtecommerce_customize_design_texts = @json_decode($tshirtecommerce_customize_design_text, true);
-					} else {
-						$tshirtecommerce_customize_design_texts = $tshirtecommerce_customize_design_text;
-					}
-					if(count($tshirtecommerce_customize_design_texts))
-					{
-						foreach ($data['languages'] as &$language) {
-							foreach ($tshirtecommerce_customize_design_texts as $key => $value) {
-								if ($language['code'] == $key) $language['tshirtecommerce_custom_text'] = $value;
-							}
-						}
-					}
-				}
-				foreach ($data['languages'] as &$language) {
-					if ($this->session->data['language'] == $language['code']) {
-						$data['tshirtecommerce_button_custom_your_design'] = $language['tshirtecommerce_custom_text'];
-					}
-				}
-
-				$data['tshirtecommerce_label_price_of_print'] = $addons->__('tshirtecommerce_label_price_of_print');
-				$data['tshirtecommerce_warning_alert_order'] = $addons->__('tshirtecommerce_warning_alert_order');
-				$data['tshirtecommerce_printing_type'] = $addons->__('tshirtecommerce_printing_type');
-				$data['oc_quantity'] = isset($product_info['quantity']) ? $product_info['quantity'] : 0;
-				$data['oc_minimum'] = isset($product_info['minimum']) ? $product_info['minimum'] : 0;
-				$data['design_product_id'] = isset($product_info['design_product_id']) ? $product_info['design_product_id'] : '';
-				$data['design_product_color'] = $addons->__('designer_color');
-
-				if (isset($product_info['design_product_title_img'])) {
-					$data['design_product_title_img'] = $product_info['design_product_title_img'];
-					$temp = explode('::', $data['design_product_title_img']);
-					if (isset($temp[2])) {
-						if ($data['design_product_id'] != '') {
-							$data['design_print_price'] = (float)$temp[2];
-							$data['design_print_price_lable'] = $this->currency->format($data['design_print_price'], $this->session->data['currency']);
-						} else {
-							$data['design_print_price'] = 0;
-						}
-					} else {
-						$data['design_print_price'] =  0;
-					}
-				} else {
-					$data['design_product_title_img'] =  '';
-					$data['design_print_price'] =  0;
-				}
-
-				$this->load->model('setting/setting');
-				if (null !== $this->config->get('tshirtecommerce_customize_design_btn')) {
-					$data['tshirtecommerce_customize_design_btn'] = $this->config->get('tshirtecommerce_customize_design_btn');
-				} else {
-					$data['tshirtecommerce_customize_design_btn'] = 'color: #ffffff;text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);background-color: #5bb75b;background-image: linear-gradient(to bottom, #62c462, #51a351);background-repeat: repeat-x;border-color: #51a351 #51a351 #387038;padding: 10px 16px;font-size: 15px;border-radius: 4px;box-shadow: inset 0 1px 0 rgba(255,255,255,.2), 0 1px 2px rgba(0,0,0,.05);width: 100%;display: block;line-height: 1.3333333;font-weight: 400;text-align: center;';
-				}
-
-				if (null !== $this->config->get('tshirtecommerce_hide_addtocart')) {
-					$data['tshirtecommerce_hide_addtocart'] = $this->config->get('tshirtecommerce_hide_addtocart');
-				} else {
-					$data['tshirtecommerce_hide_addtocart'] = 0;
-				}
-
-				if (isset($this->request->server['HTTPS']) && (($this->request->server['HTTPS'] == 'on') || ($this->request->server['HTTPS'] == '1'))) {
-		         	$site_url = $this->config->get('config_ssl');
-			    } else {
-			        $site_url = $this->config->get('config_url');
-			    }
-			    $data['site_url'] = $site_url;
-
-			    $rates_info = $this->tax->getRates(1, $product_info['tax_class_id']);
-			    $amount = 0;
-				foreach ($rates_info as $rates) {
-					if ($rates['type'] == 'P') $amount += $rates['amount'];
-				}
-				$otaxes = $amount;
-			    if ($otaxes === false) $otaxes = 0;
-				$data['otaxes'] = $otaxes;
-			
 			$this->load->model('catalog/review');
 
-			$data['tab_description'] = $this->language->get('tab_description');
-			$data['tab_attribute'] = $this->language->get('tab_attribute');
 			$data['tab_review'] = sprintf($this->language->get('tab_review'), $product_info['reviews']);
 
 			$data['product_id'] = (int)$this->request->get['product_id'];
@@ -391,13 +253,13 @@ class ControllerProductProduct extends Controller {
 			$this->load->model('tool/image');
 
 			if ($product_info['image']) {
-				$data['popup'] = $this->model_tool_image->resize($product_info['image'], $this->config->get($this->config->get('config_theme') . '_image_popup_width'), $this->config->get($this->config->get('config_theme') . '_image_popup_height'));
+				$data['popup'] = $this->model_tool_image->resize($product_info['image'], $this->config->get('theme_' . $this->config->get('config_theme') . '_image_popup_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_popup_height'));
 			} else {
 				$data['popup'] = '';
 			}
 
 			if ($product_info['image']) {
-				$data['thumb'] = $this->model_tool_image->resize($product_info['image'], $this->config->get($this->config->get('config_theme') . '_image_thumb_width'), $this->config->get($this->config->get('config_theme') . '_image_thumb_height'));
+				$data['thumb'] = $this->model_tool_image->resize($product_info['image'], $this->config->get('theme_' . $this->config->get('config_theme') . '_image_thumb_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_thumb_height'));
 			} else {
 				$data['thumb'] = '';
 			}
@@ -408,8 +270,8 @@ class ControllerProductProduct extends Controller {
 
 			foreach ($results as $result) {
 				$data['images'][] = array(
-					'popup' => $this->model_tool_image->resize($result['image'], $this->config->get($this->config->get('config_theme') . '_image_popup_width'), $this->config->get($this->config->get('config_theme') . '_image_popup_height')),
-					'thumb' => $this->model_tool_image->resize($result['image'], $this->config->get($this->config->get('config_theme') . '_image_additional_width'), $this->config->get($this->config->get('config_theme') . '_image_additional_height'))
+					'popup' => $this->model_tool_image->resize($result['image'], $this->config->get('theme_' . $this->config->get('config_theme') . '_image_popup_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_popup_height')),
+					'thumb' => $this->model_tool_image->resize($result['image'], $this->config->get('theme_' . $this->config->get('config_theme') . '_image_additional_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_additional_height'))
 				);
 			}
 
@@ -501,7 +363,7 @@ class ControllerProductProduct extends Controller {
 			$data['rating'] = (int)$product_info['rating'];
 
 			// Captcha
-			if ($this->config->get($this->config->get('config_captcha') . '_status') && in_array('review', (array)$this->config->get('config_captcha_page'))) {
+			if ($this->config->get('captcha_' . $this->config->get('config_captcha') . '_status') && in_array('review', (array)$this->config->get('config_captcha_page'))) {
 				$data['captcha'] = $this->load->controller('extension/captcha/' . $this->config->get('config_captcha'));
 			} else {
 				$data['captcha'] = '';
@@ -517,9 +379,9 @@ class ControllerProductProduct extends Controller {
 
 			foreach ($results as $result) {
 				if ($result['image']) {
-					$image = $this->model_tool_image->resize($result['image'], $this->config->get($this->config->get('config_theme') . '_image_related_width'), $this->config->get($this->config->get('config_theme') . '_image_related_height'));
+					$image = $this->model_tool_image->resize($result['image'], $this->config->get('theme_' . $this->config->get('config_theme') . '_image_related_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_related_height'));
 				} else {
-					$image = $this->model_tool_image->resize('placeholder.png', $this->config->get($this->config->get('config_theme') . '_image_related_width'), $this->config->get($this->config->get('config_theme') . '_image_related_height'));
+					$image = $this->model_tool_image->resize('placeholder.png', $this->config->get('theme_' . $this->config->get('config_theme') . '_image_related_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_related_height'));
 				}
 
 				if ($this->customer->isLogged() || !$this->config->get('config_customer_price')) {
@@ -546,44 +408,11 @@ class ControllerProductProduct extends Controller {
 					$rating = false;
 				}
 
-
-				$customize_link = '';
-				$product_design_id = '';
-				$parent_id = $result['product_id'];
-				$this->load->model('setting/setting');
-				$settings = $this->model_setting_setting->getSetting('tshirtecommerce');
-				if (isset($settings['tshirtecommerce_home']) && $settings['tshirtecommerce_home'] == 1) {
-					$query16635 = $this->db->query("
-						SELECT `design_product_id` 
-						FROM `".DB_PREFIX."product` 
-						WHERE `product_id` = ".$result['product_id'] ." LIMIT 1
-					");
-					$product_design_id = $query16635->row['design_product_id'];
-					if ($product_design_id != false && !empty($product_design_id) && $parent_id > 0) {
-						$customize_link = 'index.php?route=tshirtecommerce/designer&product_id='.$product_design_id.'&parent_id='.$parent_id;
-					}
-				}
-				if (!defined('DS')) define('DS', DIRECTORY_SEPARATOR);
-				if (!defined('ROOT')) define('ROOT', dirname(DIR_SYSTEM).DIRECTORY_SEPARATOR.'tshirtecommerce');
-				$tshirtecommerce_custom_button_text = '';
-				if (file_exists(ROOT.DS.'includes'.DS.'functions.php')) {
-					include_once ROOT.DS.'includes'.DS.'functions.php';
-					$dg = new dg();
-					include_once ROOT.DS.'includes'.DS.'addons.php';
-					$addons = new addons();
-					$lang = $dg->lang();
-					$tshirtecommerce_custom_button_text = $addons->__('tshirtecommerce_custom_button_text');
-				}
-			
 				$data['products'][] = array(
-
-				'customize_link' => $customize_link,
-				'tshirtecommerce_custom_button_text' => $tshirtecommerce_custom_button_text,
-			
 					'product_id'  => $result['product_id'],
 					'thumb'       => $image,
 					'name'        => $result['name'],
-					'description' => utf8_substr(strip_tags(html_entity_decode($result['description'], ENT_QUOTES, 'UTF-8')), 0, $this->config->get($this->config->get('config_theme') . '_product_description_length')) . '..',
+					'description' => utf8_substr(trim(strip_tags(html_entity_decode($result['description'], ENT_QUOTES, 'UTF-8'))), 0, $this->config->get('theme_' . $this->config->get('config_theme') . '_product_description_length')) . '..',
 					'price'       => $price,
 					'special'     => $special,
 					'tax'         => $tax,
@@ -608,15 +437,8 @@ class ControllerProductProduct extends Controller {
 
 			$data['recurrings'] = $this->model_catalog_product->getProfiles($this->request->get['product_id']);
 
-
-                
-                if (!defined('DS')) define('DS', DIRECTORY_SEPARATOR);
-				if (!defined('ROOT')) define('ROOT', dirname(DIR_SYSTEM).DS.'tshirtecommerce');
-                include_once(ROOT.'/opencart/includes/product_image.php');
-			
-            
 			$this->model_catalog_product->updateViewed($this->request->get['product_id']);
-
+			
 			$data['column_left'] = $this->load->controller('common/column_left');
 			$data['column_right'] = $this->load->controller('common/column_right');
 			$data['content_top'] = $this->load->controller('common/content_top');
@@ -624,6 +446,15 @@ class ControllerProductProduct extends Controller {
 			$data['footer'] = $this->load->controller('common/footer');
 			$data['header'] = $this->load->controller('common/header');
 
+
+				/* vqmod/xml/tshirtecommerce_product.xml */
+				$this->load->language('extension/module/tshirtecommerce');
+				$this->load->model('tshirtecommerce/sproduct');
+				$design_info = $this->model_tshirtecommerce_sproduct->getInfo($product_id);;
+				if ($design_info != false) {
+					$data['tshirtecommerce'] = $design_info;
+				}
+			
 			$this->response->setOutput($this->load->view('product/product', $data));
 		} else {
 			$url = '';
@@ -683,12 +514,6 @@ class ControllerProductProduct extends Controller {
 
 			$this->document->setTitle($this->language->get('text_error'));
 
-			$data['heading_title'] = $this->language->get('text_error');
-
-			$data['text_error'] = $this->language->get('text_error');
-
-			$data['button_continue'] = $this->language->get('button_continue');
-
 			$data['continue'] = $this->url->link('common/home');
 
 			$this->response->addHeader($this->request->server['SERVER_PROTOCOL'] . ' 404 Not Found');
@@ -708,8 +533,6 @@ class ControllerProductProduct extends Controller {
 		$this->load->language('product/product');
 
 		$this->load->model('catalog/review');
-
-		$data['text_no_reviews'] = $this->language->get('text_no_reviews');
 
 		if (isset($this->request->get['page'])) {
 			$page = $this->request->get['page'];
@@ -764,7 +587,7 @@ class ControllerProductProduct extends Controller {
 			}
 
 			// Captcha
-			if ($this->config->get($this->config->get('config_captcha') . '_status') && in_array('review', (array)$this->config->get('config_captcha_page'))) {
+			if ($this->config->get('captcha_' . $this->config->get('config_captcha') . '_status') && in_array('review', (array)$this->config->get('config_captcha_page'))) {
 				$captcha = $this->load->controller('extension/captcha/' . $this->config->get('config_captcha') . '/validate');
 
 				if ($captcha) {
@@ -808,6 +631,7 @@ class ControllerProductProduct extends Controller {
 		}
 
 		$product_info = $this->model_catalog_product->getProduct($product_id);
+		
 		$recurring_info = $this->model_catalog_product->getProfile($product_id, $recurring_id);
 
 		$json = array();

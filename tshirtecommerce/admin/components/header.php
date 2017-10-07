@@ -31,13 +31,7 @@
 		<script src="<?php echo site_url('assets/js/jquery.min.js'); ?>"></script>
 		<script src="<?php echo site_url('assets/plugins/jquery-ui/jquery-ui.min.js'); ?>"></script>
 		<script src="<?php echo site_url('assets/plugins/bootstrap/js/bootstrap.min.js'); ?>"></script>	
-		<script>
-			var admin_url_site = '<?php echo site_url(''); ?>';
-			jQuery(document).ready(function(){
-				var height = jQuery('body').height();
-				window.parent.setHeightF(height);
-			});
-		</script>
+		
 		<?php echo $addons->js(); ?>
 	</head>
 <body>
