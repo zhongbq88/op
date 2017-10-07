@@ -18,27 +18,6 @@ class ControllerCheckoutCart extends Controller {
 		);
 
 		if ($this->cart->hasProducts() || !empty($this->session->data['vouchers'])) {
-<<<<<<< HEAD
-			$data['heading_title'] = $this->language->get('heading_title');
-
-			$data['text_recurring_item'] = $this->language->get('text_recurring_item');
-			$data['text_next'] = $this->language->get('text_next');
-			$data['text_next_choice'] = $this->language->get('text_next_choice');
-
-			$data['column_image'] = $this->language->get('column_image');
-			$data['column_name'] = $this->language->get('column_name');
-			$data['column_model'] = $this->language->get('column_model');
-			$data['column_quantity'] = $this->language->get('column_quantity');
-			$data['column_price'] = $this->language->get('column_price');
-			$data['column_total'] = $this->language->get('column_total');
-
-			$data['button_update'] = $this->language->get('button_update');
-			$data['button_remove'] = $this->language->get('button_remove');
-			$data['button_shopping'] = $this->language->get('button_shopping');
-			$data['button_checkout'] = $this->language->get('button_checkout');
-
-=======
->>>>>>> 1c170fe64a36c3191167bac857d158e8ff3ecf46
 			if (!$this->cart->hasStock() && (!$this->config->get('config_stock_checkout') || $this->config->get('config_stock_warning'))) {
 				$data['error_warning'] = $this->language->get('error_stock');
 			} elseif (isset($this->session->data['error'])) {
@@ -76,13 +55,10 @@ class ControllerCheckoutCart extends Controller {
 
 			$data['products'] = array();
 
-<<<<<<< HEAD
-=======
 
 				/* Path: vqmod/xml/tshirtecommerce_product.xml */
 				$this->load->model('tshirtecommerce/order');
 			
->>>>>>> 1c170fe64a36c3191167bac857d158e8ff3ecf46
 			$products = $this->cart->getProducts();
 
 			foreach ($products as $product) {
@@ -99,11 +75,7 @@ class ControllerCheckoutCart extends Controller {
 				}
 
 				if ($product['image']) {
-<<<<<<< HEAD
-					$image = $this->model_tool_image->resize($product['image'], $this->config->get($this->config->get('config_theme') . '_image_cart_width'), $this->config->get($this->config->get('config_theme') . '_image_cart_height'));
-=======
 					$image = $this->model_tool_image->resize($product['image'], $this->config->get('theme_' . $this->config->get('config_theme') . '_image_cart_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_cart_height'));
->>>>>>> 1c170fe64a36c3191167bac857d158e8ff3ecf46
 				} else {
 					$image = '';
 				}
@@ -148,11 +120,7 @@ class ControllerCheckoutCart extends Controller {
 						'week'       => $this->language->get('text_week'),
 						'semi_month' => $this->language->get('text_semi_month'),
 						'month'      => $this->language->get('text_month'),
-<<<<<<< HEAD
-						'year'       => $this->language->get('text_year'),
-=======
 						'year'       => $this->language->get('text_year')
->>>>>>> 1c170fe64a36c3191167bac857d158e8ff3ecf46
 					);
 
 					if ($product['recurring']['trial']) {
@@ -167,120 +135,6 @@ class ControllerCheckoutCart extends Controller {
 				}
 
 
-<<<<<<< HEAD
-				if (!defined('DS')) define('DS', DIRECTORY_SEPARATOR);
-				if (!defined('ROOT')) define('ROOT', dirname(DIR_SYSTEM).DS.'tshirtecommerce');
-				include_once ROOT.DS.'includes'.DS.'functions.php';
-				include_once ROOT.DS.'includes'.DS.'addons.php';
-				$addons = new addons();
-
-				$data['tshirtecommerce_designer_cart_edit'] = $addons->__('designer_cart_edit');
-				$data['tshirtecommerce_printing_type'] = $addons->__('tshirtecommerce_printing_type');
-				if (isset($product['design']) && $product['design'] != false && isset($product['design']['rowid'])) {					
-					$design = $product['design'];
-					$item = $this->db->query("
-						SELECT `product_id`, `design_product_id` 
-						FROM `".DB_PREFIX."product` 
-						WHERE `status` = 1 AND `product_id` = '".$product['design']['product_id']."'
-					");
-					$design_product_id = 0;
-					if ($item->num_rows) $design_product_id = $item->row['design_product_id'];
-					$keys = explode(':', $design_product_id);
-					if (count($keys) > 1 && isset($keys[3]) && isset($design['color_hex'])) {
-						$keys[3] = $design['color_hex'];
-						$design_product_id = $keys[0].':'.$keys[1].':'.$keys[2].':'.$keys[3];
-					}
-					$product['design']['design_product_id'] = $design_product_id;
-
-					if (isset($design['images'])) {
-						$images = json_decode(str_replace('&quot;', '"', $design['images']), true);
-						if (count($images) > 0) {
-							$base_url = (isset($this->request->server['HTTPS']) && (($this->request->server['HTTPS'] == 'on') || ($this->request->server['HTTPS'] == '1'))) ? $this->config->get('config_ssl') : $this->config->get('config_url');
-							$img = '';
-							foreach ($images as $view => $src) {
-								$img .= '<a href="'.$base_url.'/tshirtecommerce/'.$src.'"><img style="width:100px; margin:1%;" src="'.$base_url.'/tshirtecommerce/'.$src.'" alt="" title="" class="img-thumbnail"></a>';
-							}
-							$design_option = array(
-								'name'	=> 'Images',
-								'value'	=> '<br /><div>'.$img.'</div>'
-							);
-							$option_data[] = $design_option;
-						}
-					}
-
-					$design_option = array(
-						'name' => 'Color',
-						'value'	=> '<span title="'.$design['color_title'].'" style="background-color:#'.$design['color_hex'].';display:inline-block;border:1px solid #ccc;width:25px;height:25px;cursor:pointer;outline:1px solid #229BCA;margin-left 4px;"></span>'
-					);
-					$option_data[] = $design_option;
-					if (isset($design['options']) && $design['options'] != '[]') {
-						$design_options = is_string($design['options']) ? json_decode(str_replace('&quot;', '"', $design['options'])) : $design['options'];
-						$html = '';
-						for ($i = 0; $i < count($design_options); $i++) {
-							if (empty($design_options[$i]['value'])) continue;
-							if (is_string($design_options[$i]['value']) && !empty($design_options[$i]['value'])) {
-								if (empty($design_options[$i]['name']) && $design_options[$i]['type'] == 'printing') {
-									$design_options[$i]['name'] = $data['tshirtecommerce_printing_type'];
-								}
-								$html .= '<dt>'.$design_options[$i]['name'].': '.$design_options[$i]['value'].'</dt>';
-							} elseif (count($design_options[$i]['value']) > 0) {
-								$html .= '<dt>'.$design_options[$i]['name'].': </dt>';
-								$html .=  '<dd>';
-								foreach ($design_options[$i]['value'] as $name => $value) {
-									if ($design_options[$i]['type'] == 'checkbox') {
-										$html .=  $value. '; ';
-									} else {
-										if ($value != '0' && $value != 0) {
-											$html .=  $name.'  -  '.$value. '; ';
-										}
-									}
-								}
-								$html .=  '</dd>';
-							}
-						}
-						$design_option = array(
-							'name'	=> 'Options',
-							'value'	=> $html
-						);
-						$option_data[] = $design_option;
-					}
-					// teams
-					if (isset($design['teams']) && isset($design['teams']['name'])) {
-						$table = '<table class="table table-bordered">'
-							. 		'<thead>'
-							. 			'<tr>'
-							. 				'<th>Name</th>'
-							. 				'<th>Number</th>'
-							. 				'<th>Sizes</th>'
-							. 			'</tr>'
-							. 		'</thead>'
-							. 		'<tbody>';
-						for ($i = 1; $i <= count($design['teams']['name']); $i++) {
-							$size = explode('::', $design['teams']['size'][$i]);
-							$table .=	'<tr>'
-								.			'<td>'.$design['teams']['name'][$i].'</td>'
-								.			'<td>'.$design['teams']['number'][$i].'</td>'
-								.			'<td>'.$size[0].'</td>'
-								.		'</tr>';
-						}
-						$table .= '</tbody></table>';
-						$design_option = array(
-							'name'	=> 'Team',
-							'value'	=> $table
-						);
-						$option_data[] = $design_option;
-					}
-				} else {
-					$design = '';					
-				}
-			
-				$data['products'][] = array(
-
-				'order_id' => (isset($product['design']['rowid']) ? $product['design']['rowid'] : 0),
-				'parent_id' => (isset($product['design']['product_id']) ? $product['design']['product_id'] : 0),
-				'design_product_id' => (isset($design_product_id) ? $design_product_id : 0),
-			
-=======
 				/* Path: vqmod/xml/tshirtecommerce_product.xml */
 				$tshirtecommerce = $this->model_tshirtecommerce_order->getCartOption($product['cart_id']);
 				$tshirtecommerce = isset($tshirtecommerce['tshirtecommerce']) ? $tshirtecommerce['tshirtecommerce'] : array();
@@ -291,7 +145,6 @@ class ControllerCheckoutCart extends Controller {
 				$option_data = $option_data_new;
 			
 				$data['products'][] = array(
->>>>>>> 1c170fe64a36c3191167bac857d158e8ff3ecf46
 					'cart_id'   => $product['cart_id'],
 					'thumb'     => $image,
 					'name'      => $product['name'],
@@ -322,11 +175,7 @@ class ControllerCheckoutCart extends Controller {
 			}
 
 			// Totals
-<<<<<<< HEAD
-			$this->load->model('extension/extension');
-=======
 			$this->load->model('setting/extension');
->>>>>>> 1c170fe64a36c3191167bac857d158e8ff3ecf46
 
 			$totals = array();
 			$taxes = $this->cart->getTaxes();
@@ -343,27 +192,16 @@ class ControllerCheckoutCart extends Controller {
 			if ($this->customer->isLogged() || !$this->config->get('config_customer_price')) {
 				$sort_order = array();
 
-<<<<<<< HEAD
-				$results = $this->model_extension_extension->getExtensions('total');
-
-				foreach ($results as $key => $value) {
-					$sort_order[$key] = $this->config->get($value['code'] . '_sort_order');
-=======
 				$results = $this->model_setting_extension->getExtensions('total');
 
 				foreach ($results as $key => $value) {
 					$sort_order[$key] = $this->config->get('total_' . $value['code'] . '_sort_order');
->>>>>>> 1c170fe64a36c3191167bac857d158e8ff3ecf46
 				}
 
 				array_multisort($sort_order, SORT_ASC, $results);
 
 				foreach ($results as $result) {
-<<<<<<< HEAD
-					if ($this->config->get($result['code'] . '_status')) {
-=======
 					if ($this->config->get('total_' . $result['code'] . '_status')) {
->>>>>>> 1c170fe64a36c3191167bac857d158e8ff3ecf46
 						$this->load->model('extension/total/' . $result['code']);
 						
 						// We have to put the totals in an array so that they pass by reference.
@@ -393,11 +231,7 @@ class ControllerCheckoutCart extends Controller {
 
 			$data['checkout'] = $this->url->link('checkout/checkout', '', true);
 
-<<<<<<< HEAD
-			$this->load->model('extension/extension');
-=======
 			$this->load->model('setting/extension');
->>>>>>> 1c170fe64a36c3191167bac857d158e8ff3ecf46
 
 			$data['modules'] = array();
 			
@@ -422,17 +256,8 @@ class ControllerCheckoutCart extends Controller {
 
 			$this->response->setOutput($this->load->view('checkout/cart', $data));
 		} else {
-<<<<<<< HEAD
-			$data['heading_title'] = $this->language->get('heading_title');
-
-			$data['text_error'] = $this->language->get('text_empty');
-
-			$data['button_continue'] = $this->language->get('button_continue');
-
-=======
 			$data['text_error'] = $this->language->get('text_empty');
 			
->>>>>>> 1c170fe64a36c3191167bac857d158e8ff3ecf46
 			$data['continue'] = $this->url->link('common/home');
 
 			unset($this->session->data['success']);
@@ -464,159 +289,6 @@ class ControllerCheckoutCart extends Controller {
 		$product_info = $this->model_catalog_product->getProduct($product_id);
 
 		if ($product_info) {
-<<<<<<< HEAD
-			if (isset($this->request->post['quantity']) && ((int)$this->request->post['quantity'] >= $product_info['minimum'])) {
-				$quantity = (int)$this->request->post['quantity'];
-			} else {
-				$quantity = $product_info['minimum'] ? $product_info['minimum'] : 1;
-			}
-
-
-				if (isset($this->request->post['design']) && isset($this->request->post['design']['options'])) {
-					$teoptions = $this->request->post['design']['options'];
-					if (!defined('DS')) {
-						define('DS', DIRECTORY_SEPARATOR);
-					}
-			        if (!defined('ROOT')) {
-			        	define('ROOT', dirname(DIR_SYSTEM).DS.'tshirtecommerce');
-			        }
-			        include_once(ROOT.'/includes/functions.php');
-			        $tdg = new \dg();
-			        $tproduct_design_ids = $this->db->query("
-						SELECT `design_product_id` 
-						FROM `".DB_PREFIX."product` 
-						WHERE `status` = 1 AND `product_id` = '".(int)$this->request->post['design']['product_id']."'
-					");
-					$teattributes = array();
-					$tproduct_design_id = $tproduct_design_ids->row['design_product_id'];
-					$tproduct_design_id_arr = explode(':', $tproduct_design_id);
-					$tdesign_id = isset($tproduct_design_id_arr[1]) ? $tproduct_design_id_arr[1] : '';
-					$tcache = $tdg->cache('admin');
-					$tdesigns = $tcache->get($this->request->post['design']['rowid']);
-					if (!empty($tdesign_id)) {
-						$ttdesign = isset($tdesigns[$tdesign_id]) ? $tdesigns[$tdesign_id] : false;
-
-						if ($ttdesign == false) {
-							$tcache = $tdg->cache('design');
-							$tdesigns = $tcache->get($this->request->post['design']['rowid']);
-							$ttdesign = isset($tdesigns[$tdesign_id]) ? $tdesigns[$tdesign_id] : false;
-						}
-						if ($ttdesign !== false) {
-							$teattributes['colors'] = $ttdesign['colors'];
-							$teattributes['print'] = $ttdesign['print'];
-							$teattributes['cliparts'] = $ttdesign['cliparts'];
-							$teattributes['product_id'] = $ttdesign['product_id'];
-							$tartStore = array();
-							$evector = isset($ttdesign['vector']) ? $ttdesign['vector'] : '';
-				            if (!empty($evector)) {
-				                $json_evector = @json_decode($evector, true);
-				                if (count($json_evector)) {
-				                    foreach ($json_evector as $view => $items) {
-				                        if (count($items)) {
-				                            foreach ($items as $item) {
-				                                if (isset($item['clipar_type']) && $item['clipar_type'] == 'store') {
-				                                    $tartStore[] = $item['clipart_id'];
-				                                }
-				                            }
-				                        }
-				                    }
-				                }
-				            }
-							$teattributes['artStore'] = $tartStore;
-
-							if (!isset($ttdesign['attribute'])) $ttdesign['attribute'] = array();
-
-							$tfile = dirname(DIR_SYSTEM).'/tshirtecommerce/data/products.json';
-							$tstring = @file_get_contents($tfile);
-							$eproducts = array();
-							if ($tstring != false) {
-								$tproducts = @json_decode($tstring, true);
-								if (count($tproducts) > 0) {
-									$eproducts = $tproducts['products'];
-								}
-							}
-							$eattributes = array();
-							foreach ($eproducts as $eproduct) {
-								if ($eproduct['id'] == $this->request->post['design']['design_product_id']) {
-									$eattributes = $eproduct['attributes'];
-								}
-							}
-							$tattributes = array();
-							foreach ($teoptions as $tkey => $tvalue) {
-								switch ($tvalue['type']) {
-									case 'checkbox':
-										$ttemp = array();
-										foreach ($tvalue['value'] as $ttkey => $ttvalue) {
-											$ttemp[$ttkey] = $ttkey;
-										}
-										$tattributes[$tkey] = $ttemp;
-										break;
-									case 'selectbox':
-									case 'radio':
-											if (isset($eattributes['titles'][$tkey]) && count($eattributes['titles'][$tkey]) > 0) {
-												foreach ($eattributes['titles'][$tkey] as $tttkey => $tttvalue) {
-													if ($tttvalue == $tvalue['value']) {
-														$tattributes[$tkey] = $tttkey;
-													}
-												}
-											}
-										break;
-									case 'textlist':
-										foreach ($tvalue['value'] as $ttkey => $ttvalue) {
-											if (count($ttvalue) > 0) {
-												if (isset($eattributes['titles'][$tkey]) && count($eattributes['titles'][$tkey]) > 0) {
-													foreach ($eattributes['titles'][$tkey] as $tttkey => $tttvalue) {
-														if ($tttvalue == $ttkey && $ttvalue > 0) {
-															$tattributes[$tkey][$tttkey] = $ttvalue;
-														}
-													}
-												}
-											}
-										}
-										break;
-									default:
-										break;
-								}
-							}
-							$teattributes['attribute'] = $tattributes;
-						}
-					} else {
-						include dirname(DIR_SYSTEM).'/tshirtecommerce/opencart/includes/cart_blank.php';
-					}
-					$this->session->data[$this->request->post['design']['rowid']] = $teattributes;
-				}
-				if (isset($this->request->post['design']) && isset($this->request->post['design']['option_oc'])) {
-					if (isset($this->request->post['design']['tattributes']) && isset($this->request->post['design']['rowid'])) {
-						$this->session->data[$this->request->post['design']['rowid']] = $this->request->post['design']['tattributes'];
-					}
-					$this->load->model('catalog/product');
-					$optoins_oc = $this->model_catalog_product->getProductOptions($product_id);
-					$_options = array();
-					$str_option_oc = str_replace('&quot;', '"', $this->request->post['design']['option_oc']);
-					$temp_design_option_oc = array();
-					$temp_option_oc = explode(';;', $str_option_oc);
-					foreach ($temp_option_oc as $topc) {
-						if (!empty($topc)) {
-							$tstr = explode('::', $topc);
-							if (count($tstr) > 1) {
-								$is_tcheckbox = false;
-								foreach ($optoins_oc as $op_oc) {
-									if ($op_oc['product_option_id'] == $tstr[0] && $op_oc['type'] == 'checkbox') {
-										$is_tcheckbox = true;
-										break;
-									}
-								}
-								if ($is_tcheckbox === false) {
-									$temp_design_option_oc[$tstr[0]] = $tstr[1];
-								} else {
-									$ttmp = explode(',', $tstr[1]);
-									if (count($ttmp) > 1) {
-										foreach ($ttmp as $ttmp_value) {
-											$temp_design_option_oc[$tstr[0]][] = $ttmp_value;
-										}
-									} else {
-										$temp_design_option_oc[$tstr[0]][] = $tstr[1];
-=======
 			if (isset($this->request->post['quantity'])) {
 				$quantity = (int)$this->request->post['quantity'];
 			} else {
@@ -713,27 +385,13 @@ class ControllerCheckoutCart extends Controller {
 										}
 									} else {
 										$option[$key] = $value;
->>>>>>> 1c170fe64a36c3191167bac857d158e8ff3ecf46
 									}
 								}
 							}
 						}
 					}
-<<<<<<< HEAD
-					$this->request->post['option'] = $temp_design_option_oc;
 				}
 			
-			if (isset($this->request->post['option'])) {
-				$option = array_filter($this->request->post['option']);
-			} else {
-				$option = array();
-			}
-
-			$product_options = $this->model_catalog_product->getProductOptions($this->request->post['product_id']);
-=======
-				}
-			
->>>>>>> 1c170fe64a36c3191167bac857d158e8ff3ecf46
 
 			foreach ($product_options as $product_option) {
 				if ($product_option['required'] && empty($option[$product_option['product_option_id']])) {
@@ -762,78 +420,6 @@ class ControllerCheckoutCart extends Controller {
 			}
 
 			if (!$json) {
-<<<<<<< HEAD
-
-				if (isset($this->request->post['design'])) {
-					$design = $this->request->post['design'];
-					$option['design'] = $design;
-				} else {
-					$str_design_product_id 	= '';
-					$str_row_id = '';
-					$str_color = '';
-					$str_design = '';
-					$this->load->model('tshirtecommerce/order');
-					$tshirtecommerce_product = $this->model_tshirtecommerce_order->getProduct($this->request->post['product_id']);
-					if (isset($tshirtecommerce_product['design_product_id'])) {
-						$tshirtecommerce_split_arr = isset($tshirtecommerce_product['design_product_id']) ? explode(':', $tshirtecommerce_product['design_product_id']) : array();
-						if (count($tshirtecommerce_split_arr) > 1) {
-							$str_row_id = isset($tshirtecommerce_split_arr[0]) ? $tshirtecommerce_split_arr[0] : '';
-							$str_design = isset($tshirtecommerce_split_arr[1]) ? $tshirtecommerce_split_arr[1] : '';
-							$str_design_product_id = isset($tshirtecommerce_split_arr[2]) ? $tshirtecommerce_split_arr[2] : '';
-							$str_color = isset($tshirtecommerce_split_arr[3]) ? $tshirtecommerce_split_arr[3] : '';
-						} else {
-							$str_design_product_id = $tshirtecommerce_product['design_product_id'];
-						}
-					}
-					$tshirtecommerce_file = dirname(DIR_SYSTEM).'/tshirtecommerce/data/products.json';
-					$tshirtecommerce_price = 0;
-					if (file_exists($tshirtecommerce_file)) {
-						$string = @file_get_contents($tshirtecommerce_file);
-						if ($string != false) {
-							$tshirtecommerce_products = json_decode($string, true);
-							// Default product
-							foreach ($tshirtecommerce_products['products'] as $p) {
-								if ($p['id'] == $str_design_product_id) {
-									$design = array();
-									$design['rowid'] = (!empty($str_row_id)) ? $str_row_id : $str_design_product_id;
-									if (!empty($str_row_id)) {
-										foreach ($p['design']['color_hex'] as $idx => $color) {
-											if ($str_color == $color) {
-												$design['color_hex'] = $str_color;
-												$design['color_title'] = $p['design']['color_title'][$idx];
-												break;
-											}
-										}
-									} else {
-										$design['color_hex'] = isset($p['design']['color_hex'][0]) ? $p['design']['color_hex'][0] : '';
-										$design['color_title'] = isset($p['design']['color_title'][0]) ? $p['design']['color_title'][0] : '';
-									}
-
-									$design['design_product_id'] = $p['id'];
-									$design['images'] = '';
-									$design['product_id'] = $tshirtecommerce_product['product_id'];
-									$design['options'] = array();
-									$design['options'][] = array('name' => 'Printing type', 'type' => 'printing', 'value' => $p['print_type']);
-
-									if (!empty($str_row_id)) {
-										$str_design_product_title_img = isset($product_info['design_product_title_img']) ? (explode('::', $product_info['design_product_title_img'])) : array();
-
-										$oc_price_of_print = isset($str_design_product_title_img[2]) ? $str_design_product_title_img[2] : 0;
-										
-										$design['oc_price_of_print'] = $oc_price_of_print;
-									} else {
-										$design['oc_price_of_print'] = 0;
-									}
-
-									$option['design'] = $design;
-								}
-							}
-						}
-					}
-				}
-			
-=======
->>>>>>> 1c170fe64a36c3191167bac857d158e8ff3ecf46
 				$this->cart->add($this->request->post['product_id'], $quantity, $option, $recurring_id);
 
 				$json['success'] = sprintf($this->language->get('text_success'), $this->url->link('product/product', 'product_id=' . $this->request->post['product_id']), $product_info['name'], $this->url->link('checkout/cart'));
@@ -845,11 +431,7 @@ class ControllerCheckoutCart extends Controller {
 				unset($this->session->data['payment_methods']);
 
 				// Totals
-<<<<<<< HEAD
-				$this->load->model('extension/extension');
-=======
 				$this->load->model('setting/extension');
->>>>>>> 1c170fe64a36c3191167bac857d158e8ff3ecf46
 
 				$totals = array();
 				$taxes = $this->cart->getTaxes();
@@ -866,27 +448,16 @@ class ControllerCheckoutCart extends Controller {
 				if ($this->customer->isLogged() || !$this->config->get('config_customer_price')) {
 					$sort_order = array();
 
-<<<<<<< HEAD
-					$results = $this->model_extension_extension->getExtensions('total');
-
-					foreach ($results as $key => $value) {
-						$sort_order[$key] = $this->config->get($value['code'] . '_sort_order');
-=======
 					$results = $this->model_setting_extension->getExtensions('total');
 
 					foreach ($results as $key => $value) {
 						$sort_order[$key] = $this->config->get('total_' . $value['code'] . '_sort_order');
->>>>>>> 1c170fe64a36c3191167bac857d158e8ff3ecf46
 					}
 
 					array_multisort($sort_order, SORT_ASC, $results);
 
 					foreach ($results as $result) {
-<<<<<<< HEAD
-						if ($this->config->get($result['code'] . '_status')) {
-=======
 						if ($this->config->get('total_' . $result['code'] . '_status')) {
->>>>>>> 1c170fe64a36c3191167bac857d158e8ff3ecf46
 							$this->load->model('extension/total/' . $result['code']);
 
 							// We have to put the totals in an array so that they pass by reference.
@@ -921,9 +492,6 @@ class ControllerCheckoutCart extends Controller {
 		// Update
 		if (!empty($this->request->post['quantity'])) {
 			foreach ($this->request->post['quantity'] as $key => $value) {
-<<<<<<< HEAD
-				$this->cart->update($key, $value);
-=======
 				
 				$this->load->model('tshirtecommerce/order');
 				$tcheck = $this->model_tshirtecommerce_order->editCart($key);
@@ -933,7 +501,6 @@ class ControllerCheckoutCart extends Controller {
 					$this->session->data['error'] = $tcheck['msg'];
 				}
 			
->>>>>>> 1c170fe64a36c3191167bac857d158e8ff3ecf46
 			}
 
 			$this->session->data['success'] = $this->language->get('text_remove');
@@ -971,11 +538,7 @@ class ControllerCheckoutCart extends Controller {
 			unset($this->session->data['reward']);
 
 			// Totals
-<<<<<<< HEAD
-			$this->load->model('extension/extension');
-=======
 			$this->load->model('setting/extension');
->>>>>>> 1c170fe64a36c3191167bac857d158e8ff3ecf46
 
 			$totals = array();
 			$taxes = $this->cart->getTaxes();
@@ -992,27 +555,16 @@ class ControllerCheckoutCart extends Controller {
 			if ($this->customer->isLogged() || !$this->config->get('config_customer_price')) {
 				$sort_order = array();
 
-<<<<<<< HEAD
-				$results = $this->model_extension_extension->getExtensions('total');
-
-				foreach ($results as $key => $value) {
-					$sort_order[$key] = $this->config->get($value['code'] . '_sort_order');
-=======
 				$results = $this->model_setting_extension->getExtensions('total');
 
 				foreach ($results as $key => $value) {
 					$sort_order[$key] = $this->config->get('total_' . $value['code'] . '_sort_order');
->>>>>>> 1c170fe64a36c3191167bac857d158e8ff3ecf46
 				}
 
 				array_multisort($sort_order, SORT_ASC, $results);
 
 				foreach ($results as $result) {
-<<<<<<< HEAD
-					if ($this->config->get($result['code'] . '_status')) {
-=======
 					if ($this->config->get('total_' . $result['code'] . '_status')) {
->>>>>>> 1c170fe64a36c3191167bac857d158e8ff3ecf46
 						$this->load->model('extension/total/' . $result['code']);
 
 						// We have to put the totals in an array so that they pass by reference.
