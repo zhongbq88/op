@@ -54,7 +54,7 @@ switch($type){
 			$uploader->setExtensions($types);
 			$uploader->setMaxSize(100);
 			$uploader->sameName(false);
-			
+			$size   =   $_FILES['myfile']["size"];
 			if($uploader->uploadFile('myfile'))
 			{
 				$params = array(

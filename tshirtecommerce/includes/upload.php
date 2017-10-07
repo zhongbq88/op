@@ -92,7 +92,7 @@ class Uploader
 		$size   =   $_FILES[$fileBrowse]["size"];
 		$name   =   $_FILES[$fileBrowse]["name"];
 		$ext    =   $this->getExtension($name);
-		
+		//echo print_r($size);
 		if(!is_dir($this->destinationPath))
 		{
 			$this->setMessage("Destination folder is not a directory ");
