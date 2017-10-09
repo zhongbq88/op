@@ -15,6 +15,8 @@
         this.$element = '';
         this.language = locale[this.options.locale];
         this.uploadList = [];
+		this.uploadRespone = [];
+		this.design = [];
         this.totalProgress = [];
         this.toUpload = [];
         this.imgNames = [];
@@ -159,6 +161,32 @@
             var index = $eventTarget.data('delete');// get the element id
             thisS.abort(index); // abort request
         });
+		
+		 $uploadBox.on('click', '.ssi-editBtn', function (e) { //remove the file from list
+            var $currentTarget = $(e.currentTarget);
+            var index = $currentTarget.data('edit'); //get file's index
+			var datas = '{"product_id": "'+thisS.options.design.design_info.design_product_id+'", "colors": {"0":"'+thisS.options.design.design_info.design.color_hex+'"},"print": {"sizes":{\"front\":{\"width\":27.988235294117647,\"height\":27.623417721518987,\"size\":3}}, "colors": {\"front\":[\"ffffff\"],\"back\":\"\",\"left\":\"\",\"right\":\"\"},"elements": {"front": [{"width": 303, "height": 299, "type": "upload"}], "back": [], "left":[], "right":[]}}, "quantity": "2", "cliparts": {"front": []}, "refer": "designer", "product_id_oc": "'+thisS.options.design.product_id+'", "print_type": "'+thisS.options.design.design_info.print_type+'", "design":'+thisS.design[index]+', "teams": { },"fonts": ""}';
+			//console.log(datas);
+			//alert(data);
+			var formData = new FormData();
+			formData.append('datainfo',datas);
+			jQuery.ajax({
+				type: "POST",
+				processData: false,
+				data: datas,
+				dataType: "json",
+				contentType: "application/json; charset=utf-8",	
+				url: thisS.options.siteURL + "ajax.php?type=addCart&edit=true"					
+			}).done(function( data ){
+				
+				//window.open('index.php?route=product/designeredit&parent_id=42&product_id='+thisS.options.design_id,'','height=628,width=1200,scrollbars=yes,status =yes');
+            	console.log(data);
+
+			});			
+			
+			
+        });
+		
 //----------------------------UPLOADFILES------------------------------------
         $uploadBtn.click(function () {// upload the files
             thisS.uploadFiles();
@@ -263,7 +291,7 @@
                 var getTemplate = function (content) {
                     return '<table class="ssi-imgToUploadTable ssi-pending">' +
                      '<tr><td class="ssi-upImgTd">' + content + '</td></tr>' +
-                     '<tr><td><div id="ssi-uploadProgress' + index + '" class="ssi-hidden ssi-uploadProgress"></div></td></tr>' +
+                     '<tr><td><div id="ssi-uploadProgress' + index + '" class="ssi-hidden ssi-uploadProgress"></div><button id = "ssi-editBtn'+index+'" data-edit="' + index + '" class=" ssi-button success  ssi-editBtn" style="display:none;"><span class="fa fa-pencil"></span></button></td></tr>' +
                      '<tr><td><button data-delete="' + index + '" class=" ssi-button error ssi-removeBtn"><span class="trash10 trash"></span></button></td></tr>' +
                      /*'<tr><td>' + cutFileName(filename, ext, 15) + '</td></tr>'*/
 					 '</table>'
@@ -567,15 +595,18 @@
                 }
                 function cb(result, data) {
                     if (result) {//if response type is success
-					console.log(data);
+					//console.log(data);
 						if (data.status == 1)
 							{
+								thisS.uploadRespone[ii] = data;
 								dataType = 'success';
                         		msg = thisS.language.success;
                         		spanClass = 'check';
                         		thisS.successfulUpload++;// one more successful upload
+								//console.log('123:'+ii);
 								element = thisS.$element.find('#ssi-imgToUpload'+ ii);
-								getResultImage('http://127.0.0.1:8080/tshirtecommerce/uploaded/2017/10/cart-front-1507268538.png','http://127.0.0.1:8080/tshirtecommerce/'+data.item.thumb,element); 
+								
+								getResultImage(thisS,'http://127.0.0.1:8080/tshirtecommerce/'+data.item.thumb,element,ii); 
 							}
 							else
 							{
@@ -638,7 +669,7 @@
                 $.each(thisS.options.data, function (key, value) {
                     formData.append(key, value);
                 });
-                formData.append('files[]', thisS.toUpload[i]);
+                formData.append('myfile', thisS.toUpload[i]);
                 ajaxLoopRequest(formData, i);
             }
         }
@@ -659,6 +690,7 @@
          element.remove();
 		 element = thisS.$element.find("#ssi-uploadProgress" + index + "");
          element.remove();
+		 $('#ssi-editBtn'+ index).attr('style','display:block;margin: 5px 0 5px 5px;padding: 0;float:left; width:20px;height:20px;');
     };
 
     var getCompleteStatus = function (thisS) {//check if file are in progress
@@ -669,31 +701,64 @@
         return '<span class="ssi-statusLabel ' + classes + ' ' + type + '" data-status="' + title + '">' + msg + '</span>';
     };
 	
-	 var getResultImage = function (srcImage, uploadImage) {//return a message label
+	 var getResultImage = function (thisS, uploadImage,element,index) {//return a message label
+	 	var design = thisS.options.design;
         var c=document.createElement('canvas');
 		ctx=c.getContext('2d');
-		c.width=500;
-		c.height=500;
+		console.log(design.front.width);
+		c.width=design.front.width;
+		c.height=design.front.height;
 		ctx.rect(0,0,c.width,c.height);
 		ctx.fillStyle='#fff';
 		ctx.fill();
-		
-			function drawing(data,n){
-		if(n<1){
-			var img=new Image;
-			//img.crossOrigin = 'Anonymous'; //解决跨域
-			img.src=data;
-			img.onload=function(){
-				ctx.drawImage(img,0,0);
-				drawing(srcImage,2);//递归
-			}
-		}else{
-			//保存生成作品图片
-			element.attr('src', c.toDataURL("image/jpeg",0.8));
+		function drawing(thisS, design, data,n,ctx,c,element,index){
+				var img=new Image;
+				img.src=data;
+				
+				img.onload=function(){
+					if(n==1){
+						ctx.drawImage(img,0,0);
+						element.attr('src', c.toDataURL("image/jpeg"));
+					}else{
+						var sx = 0;
+						var sy = 0;
+						var scale =1;
+						if(design.area.width<design.area.height){
+							scale = design.area.height/img.height;
+							if(img.width*scale<design.area.width){
+								scale = design.area.width/img.width;
+								sy = ((scale)*img.height-design.area.height)/scale;
+								sy /=2;
+							}else{
+								sx = ((scale)*img.width-design.area.width)/scale;
+								sx /=2;
+							}
+							
+						}else{
+							scale = design.area.width/img.width;
+							if(img.height*scale<design.area.height){
+								scale = design.area.height/img.height;
+								sx = ((scale)*img.width-design.area.width)/scale;
+								sx /=2;
+							}else{
+								sy = ((scale)*img.height-design.area.height)/scale;
+								sy /=2;
+							}
+							
+						}
+						
+						
+						ctx.drawImage(img,sx,sy,img.width-sx,img.height-sy,design.area.left,design.area.top,design.area.width,design.area.height);			var siteURL = thisS.options.siteURL;
+						var items = thisS.uploadRespone[index].item;
+						var colors =thisS.options.design.design_info.design.color_hex;
+						thisS.design[index]='{"vectors":{\"front\":{\"0\":{\"type\":\"clipart\",\"upload\":1,\"title\":\"'+items.title+'\",\"url\":\"'+siteURL+items.url+'\",\"file_name\":\"'+items.file_name+'\",\"thumb\":\"'+siteURL+items.thumb+'\",\"confirmColor\":true,\"remove\":true,\"edit\":false,\"rotate\":0,\"file\":{\"type\":\"image\"},\"width\":\"'+design.area.width+'px\",\"height\":\"'+design.area.height+'px\",\"change_color\":0,\"svg\":\"<svg xmlns=\\\"http://www.w3.org/2000/svg\\\" xml:space=\\\"preserve\\\" width=\\\"'+img.width*scale+'\\\" height=\\\"'+img.height*scale+'\\\" preserveAspectRatio=\\\"none\\\" xmlns:xlink=\\\"http://www.w3.org/1999/xlink\\\"><g><image x=\\\"0\\\" y=\\\"0\\\" width=\\\"'+img.width*scale+'\\\" height=\\\"'+img.height*scale+'\\\" preserveAspectRatio=\\\"none\\\" xlink:href=\\\"'+siteURL+items.url+'\\\"></image></g></svg>\",\"id\":0,\"lockedProportion\":0,\"colors\":[\"'+colors+'\"],\"top\":\"'+design.area.top+'px\",\"left\":\"'+design.area.left+'px\",\"zIndex\":\"6\"}}},"images": {"front":"'+c.toDataURL("image/jpeg")+'"},"isIE": false}';
+						//console.log(thisS.design[index]);
+						drawing(thisS, design, 'http://127.0.0.1:8080//tshirtecommerce//uploaded/2017/10/cart-front-1507268538.png',1,ctx,c,element,index);
+					}
+				}
 			
 		}
-	}
-	drawing(uploadImage,0);
+		drawing(thisS, design, uploadImage,0,ctx,c,element,index);
 		
     };
 	

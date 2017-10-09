@@ -15,7 +15,7 @@ class ModelTshirtecommerceSproduct extends Model
 		return $setting;
 	}
 
-	public function getInfo($parent_id = 0)
+	public function getInfo($parent_id = 0,$design_product_id = '')
 	{
 		if (!defined('DS')) define('DS', DIRECTORY_SEPARATOR);
 		if (!defined('ROOT')) define('ROOT', dirname(DIR_SYSTEM).'/tshirtecommerce');
@@ -29,9 +29,9 @@ class ModelTshirtecommerceSproduct extends Model
 
 		$infos = array();
 		$min_order = 1;
-		$design_product_id = '';
+		//$design_product_id = '';
 		$query = $this->db->query('SELECT `design_product_id`, `minimum` FROM `'.DB_PREFIX.'product` WHERE `product_id` = '.(int)$parent_id);
-		if ($query->num_rows) {
+		if (empty($design_product_id)&&$query->num_rows) {
 			$design_product_id = $query->row['design_product_id'];
 			$min_order = $query->row['minimum'];
 		}

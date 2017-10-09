@@ -1157,12 +1157,14 @@ class dg{
 	// add to cart
 	public function addCart($data)
 	{
+
+		
 		// get data post
 		$product_id		= $data['product_id'];
 		$colors			= $data['colors'];
 		$print			= $data['print'];		
 		$quantity		= $data['quantity'];		
-				
+		print_r($product_id);
 		// get attribute
 		if ( isset( $data['attribute'] ) )
 		{
@@ -1204,7 +1206,7 @@ class dg{
 		
 		if ($product === false)
 		{
-			$content['msg'] = 'Product could not be found';
+			$content['msg'] = "product can no found!";
 		}
 		else
 		{			

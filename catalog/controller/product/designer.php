@@ -438,14 +438,21 @@ class ControllerProductDesigner extends Controller {
 			$data['recurrings'] = $this->model_catalog_product->getProfiles($this->request->get['product_id']);
 
 			$this->model_catalog_product->updateViewed($this->request->get['product_id']);
-			
+			$this->load->model('tshirtecommerce/sproduct');
+			$data['design_info'] = $this->model_tshirtecommerce_sproduct->getInfo($this->request->get['product_id'],$this->request->get['design_product_id']);
 			$data['column_left'] = $this->load->controller('common/column_left');
 			$data['column_right'] = $this->load->controller('common/column_right');
 			$data['content_top'] = $this->load->controller('common/content_top');
 			$data['content_bottom'] = $this->load->controller('common/content_bottom');
 			$data['footer'] = $this->load->controller('common/footer');
 			$data['header'] = $this->load->controller('common/header');
-
+			if ($this->request->server['HTTPS']) {
+				$server = $this->config->get('config_ssl');
+			} else {
+				$server = $this->config->get('config_url');
+			}
+			$data['baseurl'] = $server.'/tshirtecommerce/';
+			//print_r($data['design_info']);
 			$this->response->setOutput($this->load->view('product/design', $data));
 		} else {
 			$url = '';

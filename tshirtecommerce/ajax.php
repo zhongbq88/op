@@ -439,10 +439,20 @@ switch($type){
 		break;
 	
 	case 'addCart':
-		header('Content-Type: text/html; charset=UTF-8');
-		$data = file_get_contents('php://input');
-		$data = json_decode($data, true);
-		$content = $dg->addCart($data);
+		//header('Content-Type: text/html; charset=UTF-8');
+		/*if(isset($_GET['edit'])){
+			$data = $_POST['data'];
+			print_r('123');
+			print_r($data);
+			$data = json_decode($data, true);
+			$content = $dg->addCart($data);
+		}else{*/
+			$data = file_get_contents('php://input');
+		
+			$data = json_decode($data, true);
+			print_r($data);
+			$content = $dg->addCart($data);
+		//}
 		echo json_encode($content);
 		exit;
 		break;
