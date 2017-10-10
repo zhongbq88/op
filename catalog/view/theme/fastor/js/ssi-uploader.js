@@ -207,6 +207,7 @@
 					formData.append("quantity",thisS.options.design.quantity);
 					formData.append("product_id",thisS.options.design.product_id);
 					formData.append('option[tshirtecommerce][t_product_id]',thisS.options.design.design_info.design_product_id);
+					formData.append('option[tshirtecommerce][options][t_product_id]',thisS.options.design.design_info.design_product_id);
 			   		formData.append('option[tshirtecommerce][option_oc]',"");
 					formData.append('option[tshirtecommerce][refer]',"designer");
 				 	formData.append('option[tshirtecommerce][colors]',["FFFFFF"]); 

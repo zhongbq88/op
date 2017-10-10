@@ -928,7 +928,7 @@ class ModelTshirtecommerceOrder extends Model
 	                	$temp['name'] = $this->language->get('text_cart_link_edit_design');
 	                	$temp['value'] = '<a href="'.$this->url->link('tshirtecommerce/designer', 'design='.$new_design_product_id.'&parent_id='.$data['parent_id'], true).'" target="_blank">'.$this->language->get('text_cart_view_design_text').'</a>';
 	                	$option_data[] = $temp;
-	                }
+	               }
 	            }
 
                 return $option_data;
