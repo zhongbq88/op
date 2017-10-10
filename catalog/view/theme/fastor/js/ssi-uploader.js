@@ -274,7 +274,7 @@
                     data = responseData;
                 }
 				if(data.error==0){
-					window.open('index.php?route=product/designeredit&parent_id='+thisS.options.design.product_id+'&product_id='+thisS.options.design.design_info.design_product_id+'&cart_id='+data.product.rowid,'','height=628,width=1200,scrollbars=yes,status =yes');
+					window.location.href='index.php?route=product/designeredit&parent_id='+thisS.options.design.product_id+'&product_id='+thisS.options.design.design_info.design_product_id+'&cart_id='+data.product.rowid;
 				}
 				
             	console.log(data);
