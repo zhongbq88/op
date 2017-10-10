@@ -283,7 +283,7 @@ class ControllerCheckoutCart extends Controller {
 		} else {
 			$product_id = 0;
 		}
-
+		//print_r('product_id='.$product_id);
 		$this->load->model('catalog/product');
 
 		$product_info = $this->model_catalog_product->getProduct($product_id);
@@ -294,13 +294,13 @@ class ControllerCheckoutCart extends Controller {
 			} else {
 				$quantity = 1;
 			}
-
+//print_r('quantity='.$quantity);
 			if (isset($this->request->post['option'])) {
 				$option = array_filter($this->request->post['option']);
 			} else {
 				$option = array();
 			}
-
+			//print_r($option);
 			$product_options = $this->model_catalog_product->getProductOptions($this->request->post['product_id']);
 
 				/* vqmod/xml/tshirtecommerce_product.xml */

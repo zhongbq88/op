@@ -52,7 +52,7 @@ class ControllerExtensionModuleFeatured extends Controller {
 					$href = $this->url->link('product/product', 'product_id=' . $product_info['product_id']);
 					//echo $product_info['design_product_id'];
 					if(isset($product_info['design_product_id'])&&$product_info['design_product_id']>0){
-						$href = $this->url->link('tshirtecommerce/designer', 'parent_id=' . $product_info['product_id'].'&product_id='.$product_info['design_product_id']);
+						$href = $this->url->link('product/designer', 'product_id=' . $product_info['product_id'].'&design_product_id='.$product_info['design_product_id']);
 					}
 					$data['products'][] = array(
 						'product_id'  => $product_info['product_id'],

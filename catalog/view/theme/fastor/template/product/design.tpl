@@ -85,16 +85,9 @@ include('catalog/view/theme/'.$config->get('theme_' . $config->get('config_theme
                 <div class="thumbnails thumbnails-left clearfix"> 
                 <ul>
 							  
-						      <li><img id="design-img" src="http://52.36.35.1//tshirtecommerce//uploaded/2017/10/cart-front-1507268538.png" /></li>
+					 <li><img id="design-img" src="<?php $ds = json_decode(str_replace("'",'"',$design_info['design']['front'][0]),true); echo $ds['1']['img'];?>" /></li>
                   </ul>
-                  <!--<ul>
-							  <?php if($theme_options->get( 'product_image_zoom' ) != 2 && $thumb) { ?>
-						      <li><p><a href="<?php echo $popup; ?>" class="popup-image" data-image="<?php echo $thumb; ?>" data-zoom-image="<?php echo $popup; ?>"><img src="<?php echo $theme_options->productImageThumb($product_id, $config->get('theme_default_image_additional_width'), $config->get('theme_default_image_additional_height')); ?>" title="<?php echo $heading_title; ?>" alt="<?php echo $heading_title; ?>" /></a></p></li>
-							  <?php } ?>
-						      <?php foreach ($images as $image) { ?>
-						      <li><p><a href="<?php echo $image['popup']; ?>" class="popup-image" data-image="<?php echo $image['popup']; ?>" data-zoom-image="<?php echo $image['popup']; ?>"><img src="<?php echo $image['thumb']; ?>" title="<?php echo $heading_title; ?>" alt="<?php echo $heading_title; ?>" /></a></p></li>
-						      <?php } ?>
-						  </ul>--> 
+
                 </div>
               </div>
               <?php } ?>
@@ -276,8 +269,8 @@ include('catalog/view/theme/'.$config->get('theme_' . $config->get('config_theme
 	var front_design = <?php echo str_replace("px","",$design_info['design']['front'][0]);?>;
 	var design_product_id = <?php echo $product_id; ?>;
 	var area_design = <?php echo str_replace("px","",$design_info['design']['area']['front']); ?>;
-		
-		$('#ssi-upload').ssi_uploader({url:'/tshirtecommerce/ajax.php?type=upload&remove=0',maxFileSize:6,siteURL:baseurl,allowed:['jpg','gif','png'],design:{front:front_design['1'],area:area_design,product_id:design_product_id,design_info:info_dsign}});
+		var qty = <?php echo $minimum; ?>;
+		$('#ssi-upload').ssi_uploader({url:'/tshirtecommerce/ajax.php?type=upload&remove=0',maxFileSize:6,siteURL:baseurl,allowed:['jpg','gif','png'],design:{front:front_design['1'],area:area_design,product_id:design_product_id,design_info:info_dsign,quantity:qty}});
 	</script>
 <style>
 .breadcrumb{

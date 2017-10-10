@@ -39,12 +39,15 @@
         var $uploadBtn = $('<button id="ssi-uploadBtn" class="ssi-button success ssi-hidden" >' +
          '<span class="ssi-btnIn">' + this.language.upload + '&nbsp;</span>' +
          '<div id="ssi-up_loading" class="ssi-btnIn"></div></button>');
-        var $clearBtn = $('<button id="ssi-clearBtn" class="ssi-hidden ssi-button info" >' + this.language.clear +
+		 var $saveBtn = $('<button id="ssi-saveBtn" class="ssi-hidden ssi-button info" style="margin-left:5px" >' + this.language.buynew +
+         '</button>');
+        var $clearBtn = $('<button id="ssi-clearBtn" class="ssi-hidden ssi-button error" style="margin-left:5px" >' + this.language.clear +
          '</button>');
         var $abortBtn = $('<button id="ssi-abortBtn" class="ssi-button error ssi-cancelAll ssi-hidden" ><span class="inBtn">' + this.language.abort + ' </span></button>');
 		var $tips = $('<div style="float: right;text-align:center;margin-left:20px;margin-bottom:-5px;">' + this.language.tips + ' </div>');
 
-        this.$element.append($('<div class="ssi-buttonWrapper">').append($chooseBtn, $abortBtn, $uploadBtn, $clearBtn,$tips));
+        this.$element.append($('<div class="ssi-buttonWrapper" >').append($chooseBtn, $abortBtn, $uploadBtn, $clearBtn));
+		this.$element.append($saveBtn);
         var $uploadBox;
         if (!this.options.preview) {
             this.$element.addClass('ssi-uploaderNP');
@@ -161,15 +164,29 @@
             var index = $eventTarget.data('delete');// get the element id
             thisS.abort(index); // abort request
         });
-		
-		 $uploadBox.on('click', '.ssi-editBtn', function (e) { //remove the file from list
-            var $currentTarget = $(e.currentTarget);
-            var index = $currentTarget.data('edit'); //get file's index
-			var datas = '{"product_id": "'+thisS.options.design.design_info.design_product_id+'", "colors": {"0":"'+thisS.options.design.design_info.design.color_hex+'"},"print": {"sizes":{\"front\":{\"width\":27.988235294117647,\"height\":27.623417721518987,\"size\":3}}, "colors": {\"front\":[\"ffffff\"],\"back\":\"\",\"left\":\"\",\"right\":\"\"},"elements": {"front": [{"width": 303, "height": 299, "type": "upload"}], "back": [], "left":[], "right":[]}}, "quantity": "2", "cliparts": {"front": []}, "refer": "designer", "product_id_oc": "'+thisS.options.design.product_id+'", "print_type": "'+thisS.options.design.design_info.print_type+'", "design":'+thisS.design[index]+', "teams": { },"fonts": ""}';
-			//console.log(datas);
-			//alert(data);
-			var formData = new FormData();
-			formData.append('datainfo',datas);
+		 $saveBtn.on('click',function (e) {//abort one element
+		 	//console.log(123);
+            var selected = $('input[name^=\'selected\']:checked');
+			if(selected.length<=0){
+				 alert('Please select a design product!');
+				 return;
+			}
+		   ajaxLoopRequestAddCart(thisS,selected,0);
+		   
+		   
+        });
+		function ajaxLoopRequestAddCart(thisS,selected,selectIndex) {
+			console.log(selectIndex+"---"+selected.length);
+			if(selectIndex>=selected.length){				
+				window.location.href="index.php?route=checkout/cart";
+				return;
+			}
+			if (!$(selected[selectIndex]).val()) {
+				return ajaxLoopRequestAddCart(thisS,selected,selectIndex+1);
+			}
+			var index = $(selected[selectIndex]).val();
+			console.log("index="+index);
+			var datas = getDesignInfo(thisS,index);
 			jQuery.ajax({
 				type: "POST",
 				processData: false,
@@ -177,9 +194,89 @@
 				dataType: "json",
 				contentType: "application/json; charset=utf-8",	
 				url: thisS.options.siteURL + "ajax.php?type=addCart&edit=true"					
-			}).done(function( data ){
+			}).done(function( responseData ){
+				console.log(responseData);
+				try {
+                    data = $.parseJSON(responseData);
+                } catch (err) {
+                    data = responseData;
+                }
+				if(data.error==0){
+					var option = data.product;
+					var formData =  new FormData();
+					formData.append("quantity",thisS.options.design.quantity);
+					formData.append("product_id",thisS.options.design.product_id);
+					formData.append('option[tshirtecommerce][t_product_id]',thisS.options.design.design_info.design_product_id);
+			   		formData.append('option[tshirtecommerce][option_oc]',"");
+					formData.append('option[tshirtecommerce][refer]',"designer");
+				 	formData.append('option[tshirtecommerce][colors]',["FFFFFF"]); 
+				 	formData.append('option[tshirtecommerce][type]',"cart");
+				 	formData.append('option[tshirtecommerce][price_of_print]',""+option.options.price+"");
+					formData.append('option[tshirtecommerce][tattributes][quantity]',option.quantity);
+					
+					//console.log(option.options);
+					for(var k in option) {
+						 var item = option[k];
+						 if (typeof item === 'object'){
+							for(var i in item) {
+								if (typeof item[i] === 'object'){
+									for(var key in item[i]) {
+										formData.append('option[tshirtecommerce][options]['+k+']['+i+']['+key+']',item[i][key]);
+									}
+								}else{
+									formData.append('option[tshirtecommerce][options]['+k+']['+i+']',item[i]);
+								}
+							}
+						 }else{
+							 formData.append('option[tshirtecommerce][options]['+k+']',item);
+						 }
+					}
+					
+				   $.ajax({
+							url: 'index.php?route=checkout/cart/add',
+							type: 'post',
+							data: formData,
+							dataType: 'json',
+							cache: false,
+							contentType: false,
+							processData: false,
+							success: function(responseData) {
+								  console.log(responseData);
+								  if (responseData['success']) {
+								  		ajaxLoopRequestAddCart(thisS,selected,selectIndex+1);
+								  }
+							},
+							error: function(xhr, ajaxOptions, thrownError) {
+								alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+							}
+						});
+				}
+            	//console.log(data);
+
+			});			
+		}
+		
+		 $uploadBox.on('click', '.ssi-editBtn', function (e) { //remove the file from list
+            var $currentTarget = $(e.currentTarget);
+            var index = $currentTarget.data('edit'); //get file's index
+			var datas = getDesignInfo(thisS,index);
+			jQuery.ajax({
+				type: "POST",
+				processData: false,
+				data: datas,
+				dataType: "json",
+				contentType: "application/json; charset=utf-8",	
+				url: thisS.options.siteURL + "ajax.php?type=addCart&edit=true"					
+			}).done(function( responseData ){
+				try {
+                    data = $.parseJSON(responseData);
+                } catch (err) {
+                    data = responseData;
+                }
+				if(data.error==0){
+					window.open('index.php?route=product/designeredit&parent_id='+thisS.options.design.product_id+'&product_id='+thisS.options.design.design_info.design_product_id+'&cart_id='+data.product.rowid,'','height=628,width=1200,scrollbars=yes,status =yes');
+				}
 				
-				//window.open('index.php?route=product/designeredit&parent_id=42&product_id='+thisS.options.design_id,'','height=628,width=1200,scrollbars=yes,status =yes');
             	console.log(data);
 
 			});			
@@ -291,13 +388,12 @@
                 var getTemplate = function (content) {
                     return '<table class="ssi-imgToUploadTable ssi-pending">' +
                      '<tr><td class="ssi-upImgTd">' + content + '</td></tr>' +
-                     '<tr><td><div id="ssi-uploadProgress' + index + '" class="ssi-hidden ssi-uploadProgress"></div><button id = "ssi-editBtn'+index+'" data-edit="' + index + '" class=" ssi-button success  ssi-editBtn" style="display:none;"><span class="fa fa-pencil"></span></button></td></tr>' +
-                     '<tr><td><button data-delete="' + index + '" class=" ssi-button error ssi-removeBtn"><span class="trash10 trash"></span></button></td></tr>' +
+                     '<tr><td><div id="ssi-uploadProgress' + index + '" class="ssi-hidden ssi-uploadProgress"></div></td></tr>' +
+                     '<tr><td><div style="display:none;" id = "ssi-success'+index+'"><input type="checkbox" checked id="checkbox[]"  name="selected[]" value="'+index+'" style="margin: 5px 0 5px 5px;padding: 0;width:20px;height:20px;" /><button id = "ssi-editBtn'+index+'" data-edit="' + index + '" class=" ssi-button success  ssi-editBtn" style="display:block;margin: 5px 0 5px 0px;padding: 0;float:left; width:20px;height:20px;"><span class="fa fa-pencil"></span></button></div><button data-delete="' + index + '" class=" ssi-button error ssi-removeBtn"><span class="trash10 trash"></span></button></td></tr>' +
                      /*'<tr><td>' + cutFileName(filename, ext, 15) + '</td></tr>'*/
 					 '</table>'
                 };
                 var fileType = file.type.split('/');
-
                 if (fileType[0] == 'image') {
                     $uploadBtn.prop("disabled", true);
                     $clearBtn.prop("disabled", true);
@@ -345,6 +441,16 @@
             };
         }
     };
+	
+	var getDesignInfo = function(thisS,index){
+		var json  = thisS.options.design.design_info.design.params.front ;
+		json.replace("'","\"");
+		var params = eval ("(" + json+ ")");
+		//console.log(params.width);
+		var datas = '{"product_id": "'+thisS.options.design.design_info.design_product_id+'", "colors": {"0":"'+thisS.options.design.design_info.design.color_hex+'"},"print": {"sizes":'+JSON.stringify('{\"front\":{\"width\":'+params.width+',\"height\":'+params.height+',\"size\":3}}')+', "colors": '+JSON.stringify('{\"front\":[\"ffffff\"],\"back\":\"\",\"left\":\"\",\"right\":\"\"}')+',"elements": {"front": [{"width": '+thisS.options.design.area.width+', "height": '+thisS.options.design.area.height+', "type": "upload"}], "back": [], "left":[], "right":[]}}, "quantity": "'+thisS.options.design.quantity+'", "cliparts": {"front": []}, "refer": "designer", "product_id_oc": "'+thisS.options.design.product_id+'", "print_type": "'+thisS.options.design.design_info.print_type+'", "design":'+thisS.design[index]+', "teams": { },"fonts": ""}';
+		return datas;
+	}
+	
     var clearCompleted = function (thisS) {//clear all completed files
         var $completed = thisS.$element.find('.ssi-completed');
         thisS.successfulUpload = 0;
@@ -606,7 +712,7 @@
 								//console.log('123:'+ii);
 								element = thisS.$element.find('#ssi-imgToUpload'+ ii);
 								
-								getResultImage(thisS,'http://127.0.0.1:8080/tshirtecommerce/'+data.item.thumb,element,ii); 
+								getResultImage(thisS,thisS.options.siteURL+data.item.thumb,element,ii); 
 							}
 							else
 							{
@@ -690,7 +796,9 @@
          element.remove();
 		 element = thisS.$element.find("#ssi-uploadProgress" + index + "");
          element.remove();
-		 $('#ssi-editBtn'+ index).attr('style','display:block;margin: 5px 0 5px 5px;padding: 0;float:left; width:20px;height:20px;');
+		 $('#ssi-success'+ index).attr('style','display:block');
+		 $('#ssi-saveBtn').attr('style','display:block;margin-left: 5px;float:right;');
+		 
     };
 
     var getCompleteStatus = function (thisS) {//check if file are in progress
@@ -705,7 +813,7 @@
 	 	var design = thisS.options.design;
         var c=document.createElement('canvas');
 		ctx=c.getContext('2d');
-		console.log(design.front.width);
+		//console.log(design.front.width);
 		c.width=design.front.width;
 		c.height=design.front.height;
 		ctx.rect(0,0,c.width,c.height);
@@ -743,17 +851,21 @@
 							}else{
 								sy = ((scale)*img.height-design.area.height)/scale;
 								sy /=2;
+
 							}
 							
 						}
+						var top = sy/2;
+						var left = sx/=2;
+						console.log(sx,sy,img.width-sx*2,img.height-sy*2,design.area.left,design.area.top,design.area.width,design.area.height);
 						
-						
-						ctx.drawImage(img,sx,sy,img.width-sx,img.height-sy,design.area.left,design.area.top,design.area.width,design.area.height);			var siteURL = thisS.options.siteURL;
+						ctx.drawImage(img,sx,sy,img.width-sx*2,img.height-sy*2,design.area.left,design.area.top,design.area.width,design.area.height);			var siteURL = thisS.options.siteURL;
 						var items = thisS.uploadRespone[index].item;
+						console.log( items);
 						var colors =thisS.options.design.design_info.design.color_hex;
-						thisS.design[index]='{"vectors":{\"front\":{\"0\":{\"type\":\"clipart\",\"upload\":1,\"title\":\"'+items.title+'\",\"url\":\"'+siteURL+items.url+'\",\"file_name\":\"'+items.file_name+'\",\"thumb\":\"'+siteURL+items.thumb+'\",\"confirmColor\":true,\"remove\":true,\"edit\":false,\"rotate\":0,\"file\":{\"type\":\"image\"},\"width\":\"'+design.area.width+'px\",\"height\":\"'+design.area.height+'px\",\"change_color\":0,\"svg\":\"<svg xmlns=\\\"http://www.w3.org/2000/svg\\\" xml:space=\\\"preserve\\\" width=\\\"'+img.width*scale+'\\\" height=\\\"'+img.height*scale+'\\\" preserveAspectRatio=\\\"none\\\" xmlns:xlink=\\\"http://www.w3.org/1999/xlink\\\"><g><image x=\\\"0\\\" y=\\\"0\\\" width=\\\"'+img.width*scale+'\\\" height=\\\"'+img.height*scale+'\\\" preserveAspectRatio=\\\"none\\\" xlink:href=\\\"'+siteURL+items.url+'\\\"></image></g></svg>\",\"id\":0,\"lockedProportion\":0,\"colors\":[\"'+colors+'\"],\"top\":\"'+design.area.top+'px\",\"left\":\"'+design.area.left+'px\",\"zIndex\":\"6\"}}},"images": {"front":"'+c.toDataURL("image/jpeg")+'"},"isIE": false}';
-						//console.log(thisS.design[index]);
-						drawing(thisS, design, 'http://127.0.0.1:8080//tshirtecommerce//uploaded/2017/10/cart-front-1507268538.png',1,ctx,c,element,index);
+						thisS.design[index]='{"vectors":'+JSON.stringify('{\"front\":{\"0\":{\"type\":\"clipart\",\"upload\":1,\"title\":\"'+items.title+'\",\"url\":\"'+siteURL+items.url+'\",\"file_name\":\"'+items.file_name+'\",\"thumb\":\"'+siteURL+items.thumb+'\",\"confirmColor\":true,\"remove\":true,\"edit\":false,\"rotate\":0,\"file\":{\"type\":\"image\"},\"width\":\"'+design.area.width+'px\",\"height\":\"'+design.area.height+'px\",\"change_color\":0,\"svg\":\"<svg xmlns=\\\"http://www.w3.org/2000/svg\\\" xml:space=\\\"preserve\\\" width=\\\"'+img.width*scale+'\\\" height=\\\"'+img.height*scale+'\\\" preserveAspectRatio=\\\"none\\\" xmlns:xlink=\\\"http://www.w3.org/1999/xlink\\\"><g><image x=\\\"0\\\" y=\\\"0\\\" width=\\\"'+img.width*scale+'\\\" height=\\\"'+img.height*scale+'\\\" preserveAspectRatio=\\\"none\\\" xlink:href=\\\"'+siteURL+items.url+'\\\"></image></g></svg>\",\"id\":0,\"lockedProportion\":0,\"colors\":[\"'+colors+'\"],\"top\":\"-'+top+'px\",\"left\":\"-'+left+'px\",\"zIndex\":\"6\"}}}')+',"images": {"front":"'+c.toDataURL("image/jpeg")+'"},"isIE": false,"file_name": "'+items.file_name+'"}';
+						//console.log( design.front.img);
+						drawing(thisS, design, design.front.img,1,ctx,c,element,index);
 					}
 				}
 			
@@ -941,6 +1053,7 @@
             serverError: 'Internal server error',
             error: 'Error',
             abort: 'Abort',
+			buynew: 'Buy Now',
             aborted: 'Aborted',
             files: 'files',
             upload: 'Upload',

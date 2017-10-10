@@ -33,9 +33,11 @@ if (isset($_GET['cart_id']))
 {
 	$cache 	= $dg->cache('cart');
 	$design = $cache->get($_GET['cart_id']);
+	//print_r($design);
 	if ($design != null && isset($design['item']) && isset($design['item']['product_id']))
 	{
 		$product_id = $design['item']['product_id'];
+		//print_r($product_id);
 	}
 }
 

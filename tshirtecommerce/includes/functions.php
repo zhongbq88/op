@@ -1164,7 +1164,7 @@ class dg{
 		$colors			= $data['colors'];
 		$print			= $data['print'];		
 		$quantity		= $data['quantity'];		
-		print_r($product_id);
+		//print_r($product_id);
 		// get attribute
 		if ( isset( $data['attribute'] ) )
 		{
@@ -1388,7 +1388,8 @@ class dg{
 				'options' 		=> $result->options,
 			);
 			
-			$rowid			= md5($result->product->sku . $time);
+			$rowid			= md5($result->product->sku.$data['design']['file_name'].$time);
+			//print_r('rowid='.$rowid);
 			$cache			= $this->cache('cart');			
 			
 

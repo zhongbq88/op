@@ -74,6 +74,8 @@ class ControllerProductDesigneredit extends Controller {
 		$data['url'] = $url;
 
 		$checkproduct = $this->model_tshirtecommerce_order->checkProductDesign($parent_id, $product_id);
+		//print_r('check='.$check);
+		//print_r($checkproduct);
 		if ($check == true && $checkproduct == true) {
 			$params = explode(':', $product_id);
 			$view = '<div class="row-designer"></div>';
@@ -123,7 +125,7 @@ class ControllerProductDesigneredit extends Controller {
 			if (isset($setting->site_name)) $this->document->setDescription($setting->meta_description);
 			if (isset($setting->site_name)) $this->document->setKeywords($setting->meta_keywords);			
 		}
-		
+		//print_r($view);
 		$data['content'] = $view;
 		$data['column_left'] = $this->load->controller('common/column_left');
 		$data['column_right'] = $this->load->controller('common/column_right');
@@ -131,7 +133,7 @@ class ControllerProductDesigneredit extends Controller {
 		$data['content_bottom'] = $this->load->controller('common/content_bottom');
 		$data['footer'] = $this->load->controller('common/footer');
 		$data['header'] = $this->load->controller('common/header');
-
+//print_r($data);
 		$this->response->setOutput($this->load->view('product/design_edit', $data));		
 	}
 	
