@@ -45,8 +45,6 @@
          '</button>');
         var $abortBtn = $('<button id="ssi-abortBtn" class="ssi-button error ssi-cancelAll ssi-hidden" ><span class="inBtn">' + this.language.abort + ' </span></button>');
 		var $tips = $('<div style="float: right;text-align:center;margin-left:20px;margin-bottom:-5px;">' + this.language.tips + ' </div>');
-		
-		var $productview = $('<table class="ssi-imgToUploadTable ssi-pending"><tr><td class="ssi-upImgTd"><img class="ssi-imgToUpload" id="ssi-imgToUpload0" src="'+this.options.thumb+'"></td></tr></table>');
 
         this.$element.append($('<div class="ssi-buttonWrapper" >').append($chooseBtn, $abortBtn, $uploadBtn, $clearBtn));
 		this.$element.append($saveBtn);
@@ -58,11 +56,10 @@
             var $mainBox = $('<div id="ssi-uploadFiles" class="ssi-tooltip ssi-uploadFiles ' + (this.options.dropZone ? 'ssi-dropZone' : '') + '"><div id="ssi-uploadProgressNoPreview" class="ssi-uploadProgressNoPreview"></div></div>')
              .append($namePreview);
             var $uploadDetails = $('<div class="ssi-uploadDetails"></div>').append($fileList);
-            $uploadBox = $('<div class="ssi-uploadBoxWrapper ssi-uploadBox"></div>').append($mainBox, $uploadDetail);
+            $uploadBox = $('<div class="ssi-uploadBoxWrapper ssi-uploadBox"></div>').append($mainBox, $uploadDetails);
             this.$element.prepend($uploadBox);
         } else {
             $uploadBox = $('<div id="ssi-previewBox" class="ssi-uploadBox ssi-previewBox ' + (this.options.dropZone ? 'ssi-dropZonePreview ssi-dropZone"><div id="ssi-DropZoneBack"></div>' : '">') + '</div>');
-			$uploadBox.append($productview);
             this.$element.append($uploadBox);
         }
         var thisS = this;
@@ -104,7 +101,6 @@
 
         $clearBtn.click(function () { //choose files completed and pending files
             thisS.clear();
-			$uploadBox.append($productview);
         });
 
         var $tooltip;
@@ -463,7 +459,6 @@
         thisS.abortedWithError = 0;
         if (!thisS.options.preview)$completed.prev('tr').remove();
         $completed.remove();
-		
     };
     var clearPending = function (thisS) {//clear all pending files
         var $pending = thisS.$element.find('.ssi-pending');
@@ -511,10 +506,8 @@
         $uploadBtn.prop('disabled', true);
 
         if (!this.options.preview) {
-          
-		    setNamePreview(this);
+            setNamePreview(this);
         }
-		
     };
 
     var setNamePreview = function (thisS) {//set the name preview according to the remaining elements in the list
