@@ -100,12 +100,12 @@
   float: left;
   width: 100%;
   color: #ccc;
-  padding: 10px;
+ /* padding: 10px;*/
 }
 
 .ssi-dropZonePreview {
   min-height: 300px;
-  border: 2px dashed #ccc;
+  /*border: 2px dashed #ccc;*/
   content: 'Drag n Drop Files';
 }
 
@@ -250,7 +250,7 @@ span.trash10 {
 
 .ssi-buttonWrapper {
   float: left;
-  padding: 0px 8px 8px 0 ;
+  padding:8px ;
 }
 
 .ssi-noPreviewMessage {
