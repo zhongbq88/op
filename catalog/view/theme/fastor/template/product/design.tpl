@@ -35,12 +35,20 @@ include('catalog/view/theme/'.$config->get('theme_' . $config->get('config_theme
 	var qty = <?php echo $minimum; ?>;
 	var thmb = "<?php echo $thumb; ?>";
 	$('#ssi-upload').ssi_uploader({url:'/tshirtecommerce/ajax.php?type=upload&remove=0',maxFileSize:6,siteURL:baseurl,thumb:thmb,allowed:['jpg','gif','png'],design:{front:front_design['1'],area:area_design,product_id:design_product_id,design_info:info_dsign,quantity:qty}}); 
+	$(document).ready(function(){
+		var width = $(window).width();
+		if(width<=500){
+			$('.megamenuToogle-wrapper').attr('style','display:none;');
+			$('.logo').attr('style','display:none;');
+		}
+		//console.log(width);
+	});
 	</script>
 <style>
 .breadcrumb{
 	display:none;
 }
-.megamenuToogle-wrapper{
+/*.megamenuToogle-wrapper{
 display:none;
-}
+}*/
 </style>

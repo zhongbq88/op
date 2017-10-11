@@ -180,7 +180,7 @@
 		   
         });
 		function ajaxLoopRequestAddCart(thisS,selected,selectIndex) {
-			console.log(selectIndex+"---"+selected.length);
+			
 			if(selectIndex>=selected.length){				
 				window.location.href="index.php?route=checkout/cart";
 				return;
