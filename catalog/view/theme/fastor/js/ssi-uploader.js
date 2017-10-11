@@ -48,7 +48,7 @@
 		
 		var $productview = $('<table class="ssi-imgToUploadTable ssi-pending"><tr><td class="ssi-upImgTd"><img class="ssi-imgToUpload" id="ssi-imgToUpload0" src="'+this.options.thumb+'"></td></tr></table>');
 
-        this.$element.append($('<div class="ssi-buttonWrapper" >').append($chooseBtn, $abortBtn, $uploadBtn, $clearBtn));
+        this.$element.append($('<div class="ssi-buttonWrapper" >').append($chooseBtn, $abortBtn, $uploadBtn));
 		this.$element.append($saveBtn);
         var $uploadBox;
         if (!this.options.preview) {
@@ -503,6 +503,8 @@
             $clearBtn.addClass('ssi-hidden');
             $uploadBtn.addClass('ssi-hidden');
             this.totalFilesLength = 0;
+			/*var $productview = $('<table class="ssi-imgToUploadTable ssi-pending"><tr><td class="ssi-upImgTd"><img class="ssi-imgToUpload" id="ssi-imgToUpload0" src="'+this.options.thumb+'"></td></tr></table>');
+			this.$element.find('.ssi-uploadBox').append($productview);*/
             if (!this.options.dropZone) {
                 this.$element.find('.ssi-uploadBox').removeClass('ssi-uploadNoDropZone')
             }
@@ -964,6 +966,7 @@
             thisS.toUpload = [];
             thisS.imgNames = [];
             thisS.totalFilesLength = 0;
+			$uploadBox.append($productview);
         }
         thisS.uploadList = [];
         thisS.totalProgress = [];
@@ -1055,16 +1058,16 @@
         en: {
             success: 'Success',
             sucUpload: 'Successful upload',
-            chooseFiles: 'Upload images',
+            chooseFiles: 'ADD IMAGE',
             uploadFailed: 'Upload failed',
 			tips:'<p>(We accept the following file types: <strong>png, jpg, gif</strong>)</p>',
             serverError: 'Internal server error',
             error: 'Error',
             abort: 'Abort',
-			buynew: 'Buy Now',
+			buynew: 'BUY NOW',
             aborted: 'Aborted',
             files: 'files',
-            upload: 'Upload',
+            upload: 'OK',
             clear: 'Clear',
             drag: 'Drag n Drop',
             sizeError: '$1 exceed the size limit of $2',// $1=file name ,$2=max ie( example.jpg has has exceed the size limit of 2mb)
