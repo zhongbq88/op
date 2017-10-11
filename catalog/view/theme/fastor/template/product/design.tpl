@@ -40,6 +40,10 @@ include('catalog/view/theme/'.$config->get('theme_' . $config->get('config_theme
 		if(width<=500){
 			$('.megamenuToogle-wrapper').attr('style','display:none;');
 			$('.logo').attr('style','display:none;');
+			$('#header-center.col-sm-4').attr('style','display:none;');
+			$('#header-right.col-sm-4').attr('style','height:0px;');
+			$('.dropdown').attr('style','height:20px;');
+			$('.my-account').attr('style','height:20px;');
 		}
 		//console.log(width);
 	});
