@@ -155,3 +155,17 @@ $layout 	= $GLOBALS['layout'];
 		<?php } ?>
 	</div>
 </div>
+<style>
+.product-design {
+
+  z-index:888;
+  box-sizing: content-box;
+  pointer-events: none;
+
+}
+.design-area {
+
+}
+
+
+</style>

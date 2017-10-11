@@ -87,3 +87,17 @@ $settings = $GLOBALS['settings'];
 <div class="product-views">
 	<div class="" id="product-thumbs"></div>	
 </div>
+<style>
+.product-design {
+
+  z-index:888;
+  box-sizing: content-box;
+  pointer-events: none;
+
+}
+.design-area {
+
+}
+
+
+</style>
