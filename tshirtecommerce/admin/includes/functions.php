@@ -487,7 +487,6 @@ class dg{
 	// get price of design
 	public function prices($data)
 	{
-
 		// get data post
 		$product_id		= $data['product_id'];
 		$colors			= $data['colors'];
@@ -521,7 +520,7 @@ class dg{
 		
 		if ($product === false)
 		{
-			echo json_encode( array('error' => 'Product could not be found'.) );
+			echo json_encode( array('error' => 'Product could not be found') );
 			exit;
 		}
 		else

@@ -1348,16 +1348,16 @@ class dg{
 			if(!isset($data['design']['isIE']))
 				$data['design']['isIE'] = false;
 			if (isset($data['design']['images']['front']))
-				$design['images']['front'] 	= $this->createFile($data['design']['images']['front'], $path, 'cart-front-'.$time, $data['design']['isIE']);
+				$design['images']['front'] 	= $this->createFile($data['design']['images']['front'], $path, 'cart-front-'.md5($data['design']['file_name'].$time), $data['design']['isIE']);
 					
 			if (isset($data['design']['images']['back']))	
-				$design['images']['back'] 	= $this->createFile($data['design']['images']['back'], $path, 'cart-back-'.$time, $data['design']['isIE']);
+				$design['images']['back'] 	= $this->createFile($data['design']['images']['back'], $path, 'cart-back-'.md5($data['design']['file_name'].$time), $data['design']['isIE']);
 				
 			if (isset($data['design']['images']['left']))
-				$design['images']['left'] 	= $this->createFile($data['design']['images']['left'], $path, 'cart-left-'.$time, $data['design']['isIE']);
+				$design['images']['left'] 	= $this->createFile($data['design']['images']['left'], $path, 'cart-left-'.md5($data['design']['file_name'].$time), $data['design']['isIE']);
 				
 			if (isset($data['design']['images']['right']))
-				$design['images']['right']	= $this->createFile($data['design']['images']['right'], $path, 'cart-right-'.$time, $data['design']['isIE']);
+				$design['images']['right']	= $this->createFile($data['design']['images']['right'], $path, 'cart-right-'.md5($data['design']['file_name'].$time), $data['design']['isIE']);
 				
 			if (empty($result->options)) $result->options = array();
 			
