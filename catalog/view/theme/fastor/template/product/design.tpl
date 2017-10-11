@@ -40,4 +40,7 @@ include('catalog/view/theme/'.$config->get('theme_' . $config->get('config_theme
 .breadcrumb{
 	display:none;
 }
+.megamenuToogle-wrapper{
+display:none;
+}
 </style>
