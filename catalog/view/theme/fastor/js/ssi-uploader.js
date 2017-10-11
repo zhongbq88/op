@@ -39,8 +39,8 @@
         var $uploadBtn = $('<button id="ssi-uploadBtn" class="ssi-button success ssi-hidden" >' +
          '<span class="ssi-btnIn">' + this.language.upload + '&nbsp;</span>' +
          '<div id="ssi-up_loading" class="ssi-btnIn"></div></button>');
-		 var $saveBtn = $('<button id="ssi-saveBtn" class="ssi-hidden ssi-button info" style="margin-left:5px;margin-top:8px" >' + this.language.buynew +
-         '</button>');
+		 var $saveBtn = $('<div class="ssi-buttonWrapper" style="float:right;" ><button id="ssi-saveBtn" class="ssi-hidden ssi-button info" style="margin-left:5px;" >' + this.language.buynew +
+         '</button></div>');
         var $clearBtn = $('<button id="ssi-clearBtn" class="ssi-hidden ssi-button error" style="margin-left:5px" >' + this.language.clear +
          '</button>');
         var $abortBtn = $('<button id="ssi-abortBtn" class="ssi-button error ssi-cancelAll ssi-hidden" ><span class="inBtn">' + this.language.abort + ' </span></button>');
@@ -49,7 +49,7 @@
 		var $productview = $('<table class="ssi-imgToUploadTable ssi-pending"><tr><td class="ssi-upImgTd"><img class="ssi-imgToUpload" id="ssi-imgToUpload0" src="'+this.options.thumb+'"></td></tr></table>');
 
         this.$element.append($('<div class="ssi-buttonWrapper" >').append($chooseBtn, $abortBtn, $uploadBtn, $clearBtn));
-		this.$element.append($('<div class="ssi-buttonWrapper" >').append($saveBtn));
+		this.$element.append($saveBtn);
         var $uploadBox;
         if (!this.options.preview) {
             this.$element.addClass('ssi-uploaderNP');
