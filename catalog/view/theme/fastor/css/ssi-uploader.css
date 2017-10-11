@@ -435,7 +435,7 @@ table.ssi-fileList tr.ssi-space > td {
 
 .ssi-imgToUpload {
   width: 242px;
-  height: 242px;
+  height: auto;
 }
 
 .ssi-btnIn {
