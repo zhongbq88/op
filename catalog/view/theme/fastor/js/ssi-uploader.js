@@ -34,6 +34,7 @@
 		
 		this.productImg.src=this.options.design.front.img;	
 		this.productImg.onload=function(){
+			console.log("onload="+this.options.design.front.img);
 		};
         $(element).addClass('ssi-uploadInput')
          .after(this.$element = $('<div class="ssi-uploader">'));
