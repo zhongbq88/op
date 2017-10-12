@@ -392,7 +392,7 @@
             if (thisS.options.preview) {
                 var getTemplate = function (content) {
                     return '<table class="ssi-imgToUploadTable ssi-pending">' +
-                     '<tr><td class="ssi-upImgTd">' + content + '</td></tr>' +
+                     '<tr><td class="ssi-upImgTd" >' + content + '</td></tr>' +
                      '<tr><td><div id="ssi-uploadProgress' + index + '" class="ssi-hidden ssi-uploadProgress"></div></td></tr>' +
                      '<tr><td><div style="display:none;" id = "ssi-success'+index+'"><input type="checkbox" checked id="checkbox[]"  name="selected[]" value="'+index+'" style="margin: 5px 0 5px 5px;padding: 0;width:20px;height:20px;" /><button id = "ssi-editBtn'+index+'" data-edit="' + index + '" class=" ssi-button success  ssi-editBtn" style="display:block;margin: 5px 0 5px 0px;padding: 0;float:left; width:20px;height:20px;"><span class="fa fa-pencil"></span></button></div><button data-delete="' + index + '" class=" ssi-button error ssi-removeBtn"><span class="trash10 trash"></span></button></td></tr>' +
                      /*'<tr><td>' + cutFileName(filename, ext, 15) + '</td></tr>'*/
@@ -835,7 +835,7 @@
 				
 				img.onload=function(){
 					if(n==1){
-						ctx.drawImage(img,0,0);
+						ctx.drawImage(img,0,0,design.front.width,design.front.heigh);
 						element.attr('src', c.toDataURL("image/jpeg"));
 					}else{
 						var sx = 0;
