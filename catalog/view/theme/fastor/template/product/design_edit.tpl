@@ -1,10 +1,4 @@
-<?php echo $header; 
-$theme_options = $registry->get('theme_options');
-$config = $registry->get('config');
-$page_direction = $theme_options->get( 'page_direction' ); 
-$background_status = false;
-$product_page = true;
-include('catalog/view/theme/'.$config->get('theme_' . $config->get('config_theme') . '_directory').'/template/new_elements/wrapper_top.tpl'); ?>
+<?php echo $header; ?>
 <div id="container" class="container" style=" max-width: 1200px;margin-top:20px; min-height:608px;">
 	<?php echo $content ?>
 </div>
