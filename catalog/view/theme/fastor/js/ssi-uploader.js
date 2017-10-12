@@ -823,7 +823,7 @@
 	 	var design = thisS.options.design;
         var c=document.createElement('canvas');
 		ctx=c.getContext('2d');
-		//console.log(design.front.width);
+		console.log(design.front);
 		c.width=design.front.width;
 		c.height=design.front.height;
 		ctx.rect(0,0,c.width,c.height);
