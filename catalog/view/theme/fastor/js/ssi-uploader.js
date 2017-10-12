@@ -889,6 +889,7 @@
 						//drawing(thisS, design, design.front.img,1,ctx,c,element,index);
 						if(thisS.productImg){
 							console.log(0,0,thisS.productImg.width,thisS.productImg.height,design.front.left,design.front.top,design.front.width,design.front.height);
+							thisS.productImg.crossOrigin = "*";
 							ctx.drawImage(thisS.productImg,0,0,thisS.productImg.width,thisS.productImg.height,design.front.left,design.front.top,design.front.width,design.front.height);
 							element.attr('src', c.toDataURL("image/jpeg"));
 						}
