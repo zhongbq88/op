@@ -19,15 +19,13 @@
 	<![endif]--> 
 <script src="/catalog/view/theme/fastor/js/jquery.min.js" type="text/javascript"></script> 
 <script>window.jQuery || document.write('<script src="/catalog/view/theme/fastor/js/jquery-2.1.1.min.js"><\/script>')</script> 
-<script src="/catalog/view/theme/fastor/js/ssi-uploader.js"></script> 
+<script src="/catalog/view/theme/fastor/js/ssi-uploaderm.js"></script> 
 <script type="text/javascript">
 	var baseurl = <?php echo json_encode($baseurl); ?>;
-	var info_dsign = <?php echo json_encode($design_info); ?>;
-	var front_design = <?php echo str_replace("px","",$design_info['design']['front'][0]);?>;
-	var design_product_id = <?php echo $product_id; ?>;
-	var area_design = <?php echo str_replace("px","",$design_info['design']['area']['front']); ?>;
-	var qty = <?php echo $minimum; ?>;
-	$('#ssi-upload').ssi_uploader({url:'/tshirtecommerce/ajax.php?type=upload&remove=0',maxFileSize:6,siteURL:baseurl,allowed:['jpg','gif','png'],design:{front:front_design['1'],area:area_design,product_id:design_product_id,design_info:info_dsign,quantity:qty}}); 
+	var size = <?php echo count($products)*4 ?>;
+	var count = 4;
+	var info_dsign = <?php echo json_encode($products); ?>;
+	$('#ssi-upload').ssi_uploader({url:'/tshirtecommerce/ajax.php?type=upload&remove=0',maxFileSize:size,uploadSize:count,siteURL:baseurl,allowed:['jpg','gif','png'],products:info_dsign}); 
 	$(document).ready(function(){
 		var width = $(window).width();
 		if(width<=500){
@@ -40,7 +38,7 @@
 			$('.ssi-buttonWrapper').attr('style','float: left;padding:8px ;z-index:999;bottom:0;position:fixed;');
 			//$('.ssi-buttonSaveWrapper').attr('style','float:right;padding:8px ;z-index:999;bottom:0;position:fixed;');
 		}
-		//console.log(width);
+		//console.log(info_dsign[0].front.img);
 	});
 	</script>
 <style>
