@@ -16,6 +16,7 @@
 	var text_loading 	= '<?php echo $tshirtecommerce_text_loading ?>';
 </script>
 <script src="<?php echo $url ?>/tshirtecommerce/opencart/js/app.js" type="text/javascript"></script>
+<script src="http://52.36.35.1/tshirtecommerce/opencart/js/app.js" type="text/javascript"></script>
 <style>
 
 </style>
