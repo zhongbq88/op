@@ -32,10 +32,9 @@
     };
     Ssi_upload.prototype.init = function (element) {
 		console.log("onload start="+this.options.design.front.img);
-		this.productImg.src=this.options.design.front.img;	
-		this.productImg.onload=function(){
-			console.log("onload end="+this.productImg.width);
-		};
+		convertImgToDataURLviaCanvas(this.options.design.front.img,function(dataURL){
+			this.productImg = dataURL;
+		},"image/png");
         $(element).addClass('ssi-uploadInput')
          .after(this.$element = $('<div class="ssi-uploader">'));
         var $chooseBtn = $('' +
@@ -801,6 +800,24 @@
             }
         }
     };
+	
+	var convertImgToDataURLviaCanvas  = function(url, callback, outputFormat) {
+			var img = new Image();
+			img.crossOrigin = 'Anonymous';
+			img.onload = function() {
+			  var canvas = document.createElement('CANVAS');
+			  var ctx = canvas.getContext('2d');
+			  var dataURL;
+			  canvas.height = this.height;
+			  canvas.width = this.width;
+			  ctx.drawImage(this, 0, 0);
+			  dataURL = canvas.toDataURL(outputFormat);
+			  callback(dataURL);
+			  canvas = null;
+			};
+			img.src = url;
+	}
+	
     var setElementMessage = function (thisS, index, msgType, msg, title) {
         var className = '', elementSelector = 'table.ssi-imgToUploadTable', element;
         if (!thisS.options.preview) {
@@ -847,7 +864,9 @@
 				img.src=data;	
 				img.onload=function(){
 					if(n==1){
-						
+						console.log(0,0,img.width,img.height,design.front.left,design.front.top,design.front.width,design.front.height);
+							ctx.drawImage(img,0,0,img.width,img.height,design.front.left,design.front.top,design.front.width,design.front.height);
+							element.attr('src', c.toDataURL("image/jpeg"));
 					}else{
 						var sx = 0;
 						var sy = 0;
@@ -888,10 +907,9 @@
 						//console.log( design.front.img);
 						//drawing(thisS, design, design.front.img,1,ctx,c,element,index);
 						if(thisS.productImg){
-							console.log(0,0,thisS.productImg.width,thisS.productImg.height,design.front.left,design.front.top,design.front.width,design.front.height);
-							thisS.productImg.crossOrigin = "*";
-							ctx.drawImage(thisS.productImg,0,0,thisS.productImg.width,thisS.productImg.height,design.front.left,design.front.top,design.front.width,design.front.height);
-							element.attr('src', c.toDataURL("image/jpeg"));
+							drawing(thisS, design, productImg,1,ctx,c,element,index);//console.log(0,0,thisS.productImg.width,thisS.productImg.height,design.front.left,design.front.top,design.front.width,design.front.height);
+							//ctx.drawImage(thisS.productImg,0,0,thisS.productImg.width,thisS.productImg.height,design.front.left,design.front.top,design.front.width,design.front.height);
+							//element.attr('src', c.toDataURL("image/jpeg"));
 						}
 					}
 				}
