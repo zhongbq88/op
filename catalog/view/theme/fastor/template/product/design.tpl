@@ -45,6 +45,7 @@ include('catalog/view/theme/'.$config->get('theme_' . $config->get('config_theme
 			$('.dropdown').attr('style','height:20px;');
 			$('.my-account').attr('style','height:20px;');
 			$('.ssi-buttonWrapper').attr('style','float: left;padding:8px ;z-index:999;bottom:0;position:fixed;');
+			$('.ssi-buttonSaveWrapper').attr('style','float: left;padding:8px ;z-index:999;bottom:0;position:fixed;');
 		}
 		//console.log(width);
 	});

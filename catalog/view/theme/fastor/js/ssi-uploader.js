@@ -39,7 +39,7 @@
         var $uploadBtn = $('<button id="ssi-uploadBtn" class="ssi-button success ssi-hidden" >' +
          '<span class="ssi-btnIn">' + this.language.upload + '&nbsp;</span>' +
          '<div id="ssi-up_loading" class="ssi-btnIn"></div></button>');
-		 var $saveBtn = $('<div class="ssi-buttonWrapper" style="float:right;" ><button id="ssi-saveBtn" class="ssi-hidden ssi-button info" style="margin-left:5px;" >' + this.language.buynew +
+		 var $saveBtn = $('<div class="buttonSaveWrapper" style="float:right;" ><button id="ssi-saveBtn" class="ssi-hidden ssi-button info" style="margin-left:5px;" >' + this.language.buynew +
          '</button></div>');
         var $clearBtn = $('<button id="ssi-clearBtn" class="ssi-hidden ssi-button error" style="margin-left:5px" >' + this.language.clear +
          '</button>');
