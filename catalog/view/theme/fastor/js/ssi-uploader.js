@@ -716,7 +716,7 @@
                 }
                 function cb(result, data) {
                     if (result) {//if response type is success
-					//console.log(data);
+					console.log(data);
 						if (data.status == 1)
 							{
 								thisS.uploadRespone[ii] = data;
@@ -731,7 +731,7 @@
 							}
 							else
 							{
-								ploadBar.addClass('ssi-canceledProgressBar');
+								uploadBar.addClass('ssi-canceledProgressBar');
                         		if (thisS.options.preview) {
                            		 	msg = data.msg;
                         		}
