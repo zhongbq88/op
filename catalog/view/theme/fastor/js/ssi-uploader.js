@@ -27,6 +27,7 @@
         this.pending = 0;
         this.inProgress = 0;
         this.currentListLength = 0;
+		var $productview ='';
         this.init(element);
     };
     Ssi_upload.prototype.init = function (element) {
@@ -46,7 +47,7 @@
         var $abortBtn = $('<button id="ssi-abortBtn" class="ssi-button error ssi-cancelAll ssi-hidden" ><span class="inBtn">' + this.language.abort + ' </span></button>');
 		var $tips = $('<div style="float: right;text-align:center;margin-left:20px;margin-bottom:-5px;">' + this.language.tips + ' </div>');
 		
-		var $productview = $('<table class="ssi-imgToUploadTable ssi-pending"><tr><td class="ssi-upImgTd"><img class="ssi-imgToUpload" id="ssi-imgToUpload0" src="'+this.options.thumb+'"></td></tr></table>');
+		$productview = $('<table class="ssi-imgToUploadTable ssi-pending"><tr><td class="ssi-upImgTd"><img class="ssi-imgToUpload" id="ssi-imgToUpload0" src="'+this.options.design.front.img+'"></td></tr></table>');
 
         this.$element.append($('<div class="ssi-buttonWrapper" >').append($chooseBtn, $abortBtn, $uploadBtn,$saveBtn));
 		//this.$element.append($saveBtn);
@@ -161,6 +162,8 @@
                 }
                 $clearBtn.addClass('ssi-hidden');
                 $uploadBtn.addClass('ssi-hidden');
+				$uploadBox.append($productview);
+				
             }
         });
         $uploadBox.on('click', '.ssi-abortUpload', function (e) {//abort one element
@@ -492,6 +495,7 @@
             default:
                 clearPending(this);
                 clearCompleted(this);
+				
         }
         var $uploadBtn = this.$element.find('#ssi-uploadBtn'),
          $clearBtn = this.$element.find('#ssi-clearBtn');
@@ -505,6 +509,7 @@
             this.totalFilesLength = 0;
 			/*var $productview = $('<table class="ssi-imgToUploadTable ssi-pending"><tr><td class="ssi-upImgTd"><img class="ssi-imgToUpload" id="ssi-imgToUpload0" src="'+this.options.thumb+'"></td></tr></table>');
 			this.$element.find('.ssi-uploadBox').append($productview);*/
+			
             if (!this.options.dropZone) {
                 this.$element.find('.ssi-uploadBox').removeClass('ssi-uploadNoDropZone')
             }
@@ -824,6 +829,7 @@
         var c=document.createElement('canvas');
 		ctx=c.getContext('2d');
 		console.log(design.front);
+		console.log(design.area);
 		c.width=design.front.width;
 		c.height=design.front.height;
 		ctx.rect(0,0,c.width,c.height);
@@ -831,11 +837,12 @@
 		ctx.fill();
 		function drawing(thisS, design, data,n,ctx,c,element,index){
 				var img=new Image;
-				img.src=data;
-				
+				img.src=data;	
 				img.onload=function(){
 					if(n==1){
-						ctx.drawImage(img,0,0,design.front.width,design.front.heigh);
+						console.log(0,0,img.width,img.height,design.front.left,design.front.top,design.front.width,design.front.height);
+						
+						ctx.drawImage(img,0,0,img.width,img.height,design.front.left,design.front.top,design.front.width,design.front.height);
 						element.attr('src', c.toDataURL("image/jpeg"));
 					}else{
 						var sx = 0;
@@ -966,7 +973,8 @@
             thisS.toUpload = [];
             thisS.imgNames = [];
             thisS.totalFilesLength = 0;
-			$uploadBox.append($productview);
+			
+			//$uploadBox.append($productview);
         }
         thisS.uploadList = [];
         thisS.totalProgress = [];
