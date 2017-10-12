@@ -167,6 +167,7 @@
                 $clearBtn.addClass('ssi-hidden');
                 $uploadBtn.addClass('ssi-hidden');
 				$uploadBox.append($productview);
+				 $('#ssi-saveBtn').attr('style','display:none;');
 				
             }
         });
