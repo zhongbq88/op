@@ -27,14 +27,10 @@
         this.pending = 0;
         this.inProgress = 0;
         this.currentListLength = 0;
-		this.productImg = new Image();
+		var $productview ='';
         this.init(element);
     };
     Ssi_upload.prototype.init = function (element) {
-		
-		this.productImg.src=this.options.design.front.img;	
-		this.productImg.onload=function(){
-		};
         $(element).addClass('ssi-uploadInput')
          .after(this.$element = $('<div class="ssi-uploader">'));
         var $chooseBtn = $('' +
@@ -51,7 +47,7 @@
         var $abortBtn = $('<button id="ssi-abortBtn" class="ssi-button error ssi-cancelAll ssi-hidden" ><span class="inBtn">' + this.language.abort + ' </span></button>');
 		var $tips = $('<div style="float: right;text-align:center;margin-left:20px;margin-bottom:-5px;">' + this.language.tips + ' </div>');
 		
-		$productview = $('<table class="ssi-imgToUploadTable ssi-pending"><tr><td class="ssi-upImgTd"><img class="ssi-imgToUpload" id="ssi-imgToUploadp" src="'+this.options.design.front.img+'"></td></tr></table>');
+		$productview = $('<table class="ssi-imgToUploadTable ssi-pending"><tr><td class="ssi-upImgTd"><img class="ssi-imgToUpload" id="ssi-imgToUpload0" src="'+this.options.design.front.img+'"></td></tr></table>');
 
         this.$element.append($('<div class="ssi-buttonWrapper" >').append($chooseBtn, $abortBtn, $uploadBtn,$saveBtn));
 		//this.$element.append($saveBtn);
@@ -840,12 +836,14 @@
 		ctx.fillStyle='#fff';
 		ctx.fill();
 		function drawing(thisS, design, data,n,ctx,c,element,index){
-			    //console.log(data);
 				var img=new Image;
 				img.src=data;	
 				img.onload=function(){
 					if(n==1){
+						console.log(0,0,img.width,img.height,design.front.left,design.front.top,design.front.width,design.front.height);
 						
+						ctx.drawImage(img,0,0,img.width,img.height,design.front.left,design.front.top,design.front.width,design.front.height);
+						element.attr('src', c.toDataURL("image/jpeg"));
 					}else{
 						var sx = 0;
 						var sy = 0;
@@ -884,17 +882,12 @@
 						var colors =thisS.options.design.design_info.design.color_hex;
 						thisS.design[index]='{"vectors":'+JSON.stringify('{\"front\":{\"0\":{\"type\":\"clipart\",\"upload\":1,\"title\":\"'+items.title+'\",\"url\":\"'+siteURL+items.url+'\",\"file_name\":\"'+items.file_name+'\",\"thumb\":\"'+siteURL+items.thumb+'\",\"confirmColor\":true,\"remove\":true,\"edit\":false,\"rotate\":0,\"file\":{\"type\":\"image\"},\"width\":\"'+design.area.width+'px\",\"height\":\"'+design.area.height+'px\",\"change_color\":0,\"svg\":\"<svg xmlns=\\\"http://www.w3.org/2000/svg\\\" xml:space=\\\"preserve\\\" width=\\\"'+img.width*scale+'\\\" height=\\\"'+img.height*scale+'\\\" preserveAspectRatio=\\\"none\\\" xmlns:xlink=\\\"http://www.w3.org/1999/xlink\\\"><g><image x=\\\"0\\\" y=\\\"0\\\" width=\\\"'+img.width*scale+'\\\" height=\\\"'+img.height*scale+'\\\" preserveAspectRatio=\\\"none\\\" xlink:href=\\\"'+siteURL+items.url+'\\\"></image></g></svg>\",\"id\":0,\"lockedProportion\":0,\"colors\":[\"'+colors+'\"],\"top\":\"0px\",\"left\":\"0px\",\"zIndex\":\"6\"}}}')+',"images": {"front":"'+c.toDataURL("image/jpeg")+'"},"isIE": false,"file_name": "'+items.file_name+'"}';
 						//console.log( design.front.img);
-						//drawing(thisS, design, design.front.img,1,ctx,c,element,index);
-						if(thisS.productImg){
-							console.log(0,0,thisS.productImg.width,thisS.productImg.height,design.front.left,design.front.top,design.front.width,design.front.height);
-							ctx.drawImage(thisS.productImg,0,0,thisS.productImg.width,thisS.productImg.height,design.front.left,design.front.top,design.front.width,design.front.height);
-							element.attr('src', c.toDataURL("image/jpeg"));
-						}
+						drawing(thisS, design, design.front.img,1,ctx,c,element,index);
 					}
 				}
 			
 		}
-		drawing(thisS, design, element.get(0).getAttribute("src"),0,ctx,c,element,index);
+		drawing(thisS, design, uploadImage,0,ctx,c,element,index);
 		
     };
 	
