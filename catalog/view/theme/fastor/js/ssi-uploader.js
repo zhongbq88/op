@@ -879,15 +879,17 @@
 							}
 							
 						}
-						var top = sy/2;
-						var left = sx/=2;
+						var top = sy*scale;
+						var left = sx*scale;
+						var width = img.width*scale;
+						var height = img.height*scale;
 						console.log(sx,sy,img.width-sx*2,img.height-sy*2,design.area.left,design.area.top,design.area.width,design.area.height);
 						
 						ctx.drawImage(img,sx,sy,img.width-sx*2,img.height-sy*2,design.area.left,design.area.top,design.area.width,design.area.height);			var siteURL = thisS.options.siteURL;
 						var items = thisS.uploadRespone[index].item;
 						console.log( items);
 						var colors =thisS.options.design.design_info.design.color_hex;
-						thisS.design[index]='{"vectors":'+JSON.stringify('{\"front\":{\"0\":{\"type\":\"clipart\",\"upload\":1,\"title\":\"'+items.title+'\",\"url\":\"'+siteURL+items.url+'\",\"file_name\":\"'+items.file_name+'\",\"thumb\":\"'+siteURL+items.thumb+'\",\"confirmColor\":true,\"remove\":true,\"edit\":false,\"rotate\":0,\"file\":{\"type\":\"image\"},\"width\":\"'+design.area.width+'px\",\"height\":\"'+design.area.height+'px\",\"change_color\":0,\"svg\":\"<svg xmlns=\\\"http://www.w3.org/2000/svg\\\" xml:space=\\\"preserve\\\" width=\\\"'+img.width*scale+'\\\" height=\\\"'+img.height*scale+'\\\" preserveAspectRatio=\\\"none\\\" xmlns:xlink=\\\"http://www.w3.org/1999/xlink\\\"><g><image x=\\\"0\\\" y=\\\"0\\\" width=\\\"'+img.width*scale+'\\\" height=\\\"'+img.height*scale+'\\\" preserveAspectRatio=\\\"none\\\" xlink:href=\\\"'+siteURL+items.url+'\\\"></image></g></svg>\",\"id\":0,\"lockedProportion\":0,\"colors\":[\"'+colors+'\"],\"top\":\"0px\",\"left\":\"0px\",\"zIndex\":\"6\"}}}')+',"images": {"front":"'+c.toDataURL("image/jpeg")+'"},"isIE": false,"file_name": "'+items.file_name+'"}';
+						thisS.design[index]='{"vectors":'+JSON.stringify('{\"front\":{\"0\":{\"type\":\"clipart\",\"upload\":1,\"title\":\"'+items.title+'\",\"url\":\"'+siteURL+items.url+'\",\"file_name\":\"'+items.file_name+'\",\"thumb\":\"'+siteURL+items.thumb+'\",\"confirmColor\":true,\"remove\":true,\"edit\":false,\"rotate\":0,\"file\":{\"type\":\"image\"},\"width\":\"'+width+'px\",\"height\":\"'+height+'px\",\"change_color\":0,\"svg\":\"<svg xmlns=\\\"http://www.w3.org/2000/svg\\\" xml:space=\\\"preserve\\\" width=\\\"'+design.area.width+'\\\" height=\\\"'+design.area.height+'\\\" preserveAspectRatio=\\\"none\\\" xmlns:xlink=\\\"http://www.w3.org/1999/xlink\\\"><g><image x=\\\"0\\\" y=\\\"0\\\" width=\\\"'+img.width*scale+'\\\" height=\\\"'+img.height*scale+'\\\" preserveAspectRatio=\\\"none\\\" xlink:href=\\\"'+siteURL+items.url+'\\\"></image></g></svg>\",\"id\":0,\"lockedProportion\":0,\"colors\":[\"'+colors+'\"],\"top\":\"-'+top+'px\",\"left\":\"-'+left+'px\",\"zIndex\":\"6\"}}}')+',"images": {"front":"'+c.toDataURL("image/jpeg")+'"},"isIE": false,"file_name": "'+items.file_name+'"}';
 						//console.log( design.front.img);
 						//drawing(thisS, design, design.front.img,1,ctx,c,element,index);
 						if(thisS.productImg){
