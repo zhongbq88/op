@@ -149,7 +149,7 @@
                 $uploadBtn.prop('disabled', true); //if there is no more files disable upload button
             }
             if (thisS.options.preview) { //if preview is true
-                $currentTarget.parents('table.ssi-imgToUploadTable').remove(); //remove table
+                //$currentTarget.parents('table.ssi-imgToUploadTable').remove(); //remove table
             } else {
                 var target = $currentTarget.parents('tr.ssi-toUploadTr'); //find the tr of file
                 $namePreview.html((thisS.currentListLength) + ' files'); //set the main name to the remaining files
@@ -289,7 +289,7 @@
                     data = responseData;
                 }
 				if(data.error==0){
-					window.location.href='index.php?route=product/designeredit&parent_id='+thisS.options.design.product_id+'&product_id='+thisS.options.design.design_info.design_product_id+'&cart_id='+data.product.rowid;
+					window.open('index.php?route=product/designeredit&parent_id='+thisS.options.design.product_id+'&product_id='+thisS.options.design.design_info.design_product_id+'&cart_id='+data.product.rowid);
 				}
 				
             	console.log(data);
@@ -1005,7 +1005,7 @@
             data: {},
             locale: 'en',
             preview: true,
-            dropZone: true,
+            dropZone: false,
             maxNumberOfFiles: '',
             responseValidation: false,
             maxFileSize: 2,

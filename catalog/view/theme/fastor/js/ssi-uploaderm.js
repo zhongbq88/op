@@ -303,7 +303,7 @@
                 }
 				if(data.error==0){
 					var product = thisS.options.products[pindex];
-					window.location.href='index.php?route=product/designeredit&parent_id='+product.product_id+'&product_id='+product.design_product_id+'&cart_id='+data.product.rowid;
+					window.open('index.php?route=product/designeredit&parent_id='+product.product_id+'&product_id='+product.design_product_id+'&cart_id='+data.product.rowid);
 				}
 				
             	console.log(data);
@@ -1063,7 +1063,7 @@
             data: {},
             locale: 'en',
             preview: true,
-            dropZone: true,
+            dropZone: false,
             maxNumberOfFiles: '',
             responseValidation: false,
             maxFileSize: 2,
