@@ -16,12 +16,17 @@ class ControllerProductDesignermore extends Controller {
 			$data['products'] = array();
 			$this->load->model('tshirtecommerce/sproduct');
 			foreach($products as $product){
-				$design =  $this->model_tshirtecommerce_sproduct->getInfo($product['product_id'],$product['design_product_id']);
-				$front = json_decode(str_replace("'","\"",str_replace("px","",$design['design']['front'][0])),true);
-				$product['front'] = $front[1];
-				$product['area'] = json_decode(str_replace("'","\"",str_replace("px","",$design['design']['area']['front'])),true);
-				$product['design_info'] = $design;
-				$data['products'][] = $product;
+				if(!empty($product['design_product_id'])){
+					$design =  $this->model_tshirtecommerce_sproduct->getInfo($product['product_id'],$product['design_product_id']);
+					if(isset($design)){
+						$front = json_decode(str_replace("'","\"",str_replace("px","",$design['design']['front'][0])),true);
+						$product['front'] = $front[1];
+						$product['area'] = json_decode(str_replace("'","\"",str_replace("px","",$design['design']['area']['front'])),true);
+						$product['design_info'] = $design;
+						$data['products'][] = $product;
+					}
+				}
+				
 			}
 			
 			$data['footer'] = $this->load->controller('common/footer');

@@ -23,9 +23,12 @@
 <script type="text/javascript">
 	var baseurl = <?php echo json_encode($baseurl); ?>;
 	var size = <?php echo count($products)*4 ?>;
-	var count = 4;
-	var info_dsign = <?php echo json_encode($products); ?>;
-	$('#ssi-upload').ssi_uploader({url:'/tshirtecommerce/ajax.php?type=upload&remove=0',maxFileSize:size,uploadSize:count,siteURL:baseurl,allowed:['jpg','gif','png'],products:info_dsign}); 
+	if(size>0){
+		var count = 4;
+		var info_dsign = <?php echo json_encode($products); ?>;
+		$('#ssi-upload').ssi_uploader({url:'/tshirtecommerce/ajax.php?type=upload&remove=0',maxFileSize:size,uploadSize:count,siteURL:baseurl,allowed:['jpg','gif','png'],products:info_dsign}); 
+	}
+	
 	$(document).ready(function(){
 		var width = $(window).width();
 		if(width<=500){
