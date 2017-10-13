@@ -4,7 +4,9 @@
   <div class="container">
     <div class="row">
       <div class="col-md-12">
+      <?php if(count($products)>0){?>
         <input type="file" multiple id="ssi-upload"/>
+        <?php }?>
       </div>
     </div>
   </div>
