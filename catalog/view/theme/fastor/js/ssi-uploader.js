@@ -41,21 +41,21 @@
          .after(this.$element = $('<div class="ssi-uploader">'));
         var $chooseBtn = $('' +
          '<span class="ssi-InputLabel">' +
-         '<button class="ssi-button success">' + this.language.chooseFiles + '</button>' +
+         '<button class="ssi-button success" id="chooseBtn" >' + this.language.chooseFiles + '</button>' +
          '</span>').append(element);
         var $uploadBtn = $('<button id="ssi-uploadBtn" class="ssi-button success ssi-hidden" >' +
          '<span class="ssi-btnIn">' + this.language.upload + '&nbsp;</span>' +
          '<div id="ssi-up_loading" class="ssi-btnIn"></div></button>');
-		 var $saveBtn = $('<button id="ssi-saveBtn" class="ssi-hidden ssi-button info" style="margin-left:5px;" >' + this.language.buynew +
+		 var $saveBtn = $('<button id="ssi-saveBtn" class="ssi-hidden ssi-button error" style="margin-left:5px;" >' + this.language.buynew +
          '</button>');
         var $clearBtn = $('<button id="ssi-clearBtn" class="ssi-hidden ssi-button error" style="margin-left:5px" >' + this.language.clear +
          '</button>');
         var $abortBtn = $('<button id="ssi-abortBtn" class="ssi-button error ssi-cancelAll ssi-hidden" ><span class="inBtn">' + this.language.abort + ' </span></button>');
 		var $tips = $('<div style="float: right;text-align:center;margin-left:20px;margin-bottom:-5px;">' + this.language.tips + ' </div>');
 		
-		$productview = $('<table class="ssi-imgToUploadTable ssi-pending"><tr><td class="ssi-upImgTd"><img class="ssi-imgToUpload" id="ssi-imgToUploadp" src="'+this.options.design.front.img+'"></td></tr></table>');
+		$productview = getTemplate('<img class="ssi-imgToUpload" id="ssi-imgToUpload0" src="'+this.options.design.front.img+'"/><i style="display:none" class="fa-spin fa fa-spinner fa-pulse"></i>',0);
 
-        this.$element.append($('<div class="ssi-buttonWrapper" >').append($chooseBtn, $abortBtn, $uploadBtn,$saveBtn));
+        this.$element.append($('<div class="ssi-buttonWrapper" >').append($chooseBtn,$saveBtn));
 		//this.$element.append($saveBtn);
         var $uploadBox;
         if (!this.options.preview) {
@@ -81,6 +81,9 @@
         $input.on('change', function () { //choose files
             thisS.toUploadFiles(this.files);
             $input.val('');
+			console.log('');
+			
+			
         });
         //drag n drop
         if (thisS.options.dropZone) {
@@ -170,6 +173,8 @@
                 $uploadBtn.addClass('ssi-hidden');
 				$uploadBox.append($productview);
 				 $('#ssi-saveBtn').attr('style','display:none;');
+				  $('#chooseBtn').attr('style','border-radius:0px;width:100%');
+				  $('#chooseBtn').text(thisS.language.chooseFiles);
 				
             }
         });
@@ -289,7 +294,7 @@
                     data = responseData;
                 }
 				if(data.error==0){
-					window.open('index.php?route=product/designeredit&parent_id='+thisS.options.design.product_id+'&product_id='+thisS.options.design.design_info.design_product_id+'&cart_id='+data.product.rowid);
+					window.location.href='index.php?route=product/designeredit&parent_id='+thisS.options.design.product_id+'&product_id='+thisS.options.design.design_info.design_product_id+'&cart_id='+data.product.rowid;
 				}
 				
             	console.log(data);
@@ -331,7 +336,7 @@
          $uploadBox = this.$element.find('.ssi-uploadBox'),
          imgs = [];
         if ((this.inProgress === 0 && this.pending === 0)) { //if no file are pending or are in progress
-            this.clear(); //clear the list
+           // this.clear(); //clear the list
         }
         var extErrors = [], sizeErrors = [], errorMessage = '';
         var toUploadLength, filesLength = length = toUploadLength = files.length;
@@ -400,29 +405,28 @@
             var ext = filename.getExtension(); //get file's extension
             thisS.imgNames[index] = filename; //register file's name
             if (thisS.options.preview) {
-                var getTemplate = function (content) {
-                    return '<table class="ssi-imgToUploadTable ssi-pending">' +
-                     '<tr><td class="ssi-upImgTd" >' + content + '</td></tr>' +
-                     '<tr><td><div id="ssi-uploadProgress' + index + '" class="ssi-hidden ssi-uploadProgress"></div></td></tr>' +
-                     '<tr><td><div style="display:none;" id = "ssi-success'+index+'"><input type="checkbox" checked id="checkbox[]"  name="selected[]" value="'+index+'" style="margin: 5px 0 5px 5px;padding: 0;width:20px;height:20px;" /><button id = "ssi-editBtn'+index+'" data-edit="' + index + '" class=" ssi-button success  ssi-editBtn" style="display:block;margin: 5px 0 5px 0px;padding: 0;float:left; width:20px;height:20px;"><span class="fa fa-pencil"></span></button></div><button data-delete="' + index + '" class=" ssi-button error ssi-removeBtn"><span class="trash10 trash"></span></button></td></tr>' +
-                     /*'<tr><td>' + cutFileName(filename, ext, 15) + '</td></tr>'*/
-					 '</table>'
-                };
+                
                 var fileType = file.type.split('/');
                 if (fileType[0] == 'image') {
                     $uploadBtn.prop("disabled", true);
                     $clearBtn.prop("disabled", true);
                     var fileReader = new FileReader();
                     fileReader.onload = function () {
-                        imgContent += getTemplate('<img class="ssi-imgToUpload" id="ssi-imgToUpload' + index + '" src=""/><i class="fa-spin fa fa-spinner fa-pulse"></i>'); // set the files element without the img
+                       if(index>0){
+							 imgContent += getTemplate('<img class="ssi-imgToUpload" id="ssi-imgToUpload' + index + '" src="'+thisS.options.design.front.img+'"/><i class="fa-spin fa fa-spinner fa-pulse"></i>',index); // set the files element without the img
+						}
                         imgs[index] = fileReader.result;
                         j++;
                         if (toUploadLength === j) {// if all elements are in place lets load images
-                            $uploadBox.append(imgContent);
+						if(index>0){
+							 $uploadBox.append(imgContent);
+						}
+                           
                             $uploadBtn.prop("disabled", false);
                             $clearBtn.prop("disabled", false);
                             setTimeout(function () {
                                 setImg();//and load the images
+								thisS.uploadFiles();
                             }, 10);
                             imgContent = '';
                             toUploadLength = [];
@@ -447,15 +451,26 @@
                     if (imgs[i] !== null) {
                         $uploadBox.find("#ssi-uploadProgress" + i).parents('table.ssi-imgToUploadTable')
                          .find('.ssi-imgToUpload')
-                         .attr('src', imgs[i]) //set src of the image
+                         .attr('src-data', imgs[i]) //set src of the image
                          .next().remove();//remove the spinner
                         imgs[i] = null;
                     }
                 }
                 imgs = [];
+				
             };
         }
     };
+	
+	var getTemplate = function (content,index) {
+                    return '<table class="ssi-imgToUploadTable ssi-pending">' +
+					'<tr><td><input  type="checkbox" checked id="checkbox[]"  name="selected[]" value="'+index+'" style="margin: 5px 0 5px 5px;padding: 0;width:25px;height:25px;" /><button id = "ssi-editBtn'+index+'" data-edit="' + index + '" class="ssi-button success  ssi-editBtn" style="margin: 5px 0 5px 8px;padding: 0;float:right; width:25px;height:25px;"><span class="fa fa-pencil"></span></button></td></tr>'+
+'<tr><td class="ssi-upImgTd" >' + content + '</td></tr>' +
+                     '<tr><td><div id="ssi-uploadProgress' + index + '" class="ssi-hidden ssi-uploadProgress"></div></td></tr>' +
+                   /*  '<tr><td><button data-delete="' + index + '" class=" ssi-button error ssi-removeBtn"><span class="trash10 trash"></span></button></td></tr>' +*/
+                     /*'<tr><td>' + cutFileName(filename, ext, 15) + '</td></tr>'*/
+					 '</table>';
+     };
 	
 	var getDesignInfo = function(thisS,index){
 		var json  = thisS.options.design.design_info.design.params.front ;
@@ -593,6 +608,7 @@
             if (!thisS.options.preview) {
                 selector = 'tr.ssi-toUploadTr'
             }
+			 console.log(ii);
             var uploadBar = thisS.$element.find('#ssi-uploadProgress' + ii);//get the file's  progress bar
             uploadBar.removeClass('ssi-hidden') //make it visible
              .parents(selector).removeClass('ssi-pending');
@@ -603,6 +619,7 @@
                         if (e.lengthComputable) {
                             var percentComplete = (e.loaded / e.total) * 100;// calculate the progress
                             if (uploadBar) {
+								console.log(percentComplete);
                                 uploadBar.css({
                                     width: percentComplete + '%'//update the progress bar width according to the progress
                                 });
@@ -819,7 +836,13 @@
 		 element = thisS.$element.find("#ssi-uploadProgress" + index + "");
          element.remove();
 		 $('#ssi-success'+ index).attr('style','display:block');
-		 $('#ssi-saveBtn').attr('style','display:block;margin-left: 5px;float:right;');
+		 if($(window).width()<=500){
+			 $('#ssi-saveBtn').attr('style','display:block;float:right;border-radius:0px;width:50%');
+			 $('#chooseBtn').attr('style','border-radius:0px;width:50%');
+		 }else{
+			 $('#ssi-saveBtn').attr('style','display:block;float:right;margin-left:8px;');
+		 }
+		 $('#chooseBtn').text(thisS.language.chooseMoreFiles);
 		 
     };
 
@@ -901,7 +924,7 @@
 				}
 			
 		}
-		drawing(thisS, design, element.get(0).getAttribute("src"),0,ctx,c,element,index);
+		drawing(thisS, design, element.get(0).getAttribute("src-data"),0,ctx,c,element,index);
 		
     };
 	
@@ -986,7 +1009,7 @@
             $uploadBtn.addClass('ssi-hidden');
             thisS.toUpload = [];
             thisS.imgNames = [];
-            thisS.totalFilesLength = 0;
+           // thisS.totalFilesLength = 0;
 			
 			//$uploadBox.append($productview);
         }
@@ -1080,13 +1103,14 @@
         en: {
             success: 'Success',
             sucUpload: 'Successful upload',
-            chooseFiles: 'ADD IMAGE',
+            chooseFiles: '上传图片（可多图）',
+			chooseMoreFiles: '继续上图',
             uploadFailed: 'Upload failed',
 			tips:'<p>(We accept the following file types: <strong>png, jpg, gif</strong>)</p>',
             serverError: 'Internal server error',
             error: 'Error',
             abort: 'Abort',
-			buynew: 'BUY NOW',
+			buynew: '购买',
             aborted: 'Aborted',
             files: 'files',
             upload: 'OK',
