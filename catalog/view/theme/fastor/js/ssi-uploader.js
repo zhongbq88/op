@@ -464,7 +464,7 @@
 	
 	var getTemplate = function (content,index) {
                     return '<table class="ssi-imgToUploadTable ssi-pending">' +
-					'<tr id="editbtntr'+index+'" class="ssi-hidden"><td><input  type="checkbox" checked id="checkbox[]"  name="selected[]" value="'+index+'" style="margin: 5px 0 5px 5px;padding: 0;width:25px;height:25px;" /><button id = "ssi-editBtn'+index+'" data-edit="' + index + '" class="ssi-button success  ssi-editBtn" style="margin: 5px 0 5px 8px;padding: 0;float:right; width:25px;height:25px;"><span class="fa fa-pencil"></span></button></td></tr>'+
+					'<tr id="editbtntr'+index+'" style="display:none"><td><input  type="checkbox" checked id="checkbox[]"  name="selected[]" value="'+index+'" style="margin: 5px 0 5px 5px;padding: 0;width:25px;height:25px;" /><button id = "ssi-editBtn'+index+'" data-edit="' + index + '" class="ssi-button success  ssi-editBtn" style="margin: 5px 0 5px 8px;padding: 0;float:right; width:25px;height:25px;"><span class="fa fa-pencil"></span></button></td></tr>'+
 '<tr><td class="ssi-upImgTd" >' + content + '</td></tr>' +
                      '<tr><td><div id="ssi-uploadProgress' + index + '" class="ssi-hidden ssi-uploadProgress"></div></td></tr>' +
                    /*  '<tr><td><button data-delete="' + index + '" class=" ssi-button error ssi-removeBtn"><span class="trash10 trash"></span></button></td></tr>' +*/
@@ -752,7 +752,7 @@
 								//console.log('123:'+ii);
 								element = thisS.$element.find('#ssi-imgToUpload'+ ii);
 								var editbtntr =  thisS.$element.find('#editbtntr' + ii);
-								editbtntr.removeClass('ssi-hidden');
+								editbtntr.attr('style','display: inline-block;position: absolute;');
 								getResultImage(thisS,thisS.options.siteURL+data.item.thumb,element,ii); 
 							}
 							else
