@@ -35,7 +35,7 @@
 
 		this.productImg.src=this.options.design.front.img;	
 		this.productImg.onload=function(){
-			//console.log("onload end="+this.productImg.width);
+			console.log("onload end="+this.productImg.width);
 		};
         $(element).addClass('ssi-uploadInput')
          .after(this.$element = $('<div class="ssi-uploader">'));
@@ -378,6 +378,7 @@
                 }
             }
         }
+		
         var extErrorsLength = extErrors.length, sizeErrorsLength = sizeErrors.length;
         if (extErrorsLength + sizeErrorsLength > 0) { // in the end expose all errors
             if (extErrorsLength > 0) {

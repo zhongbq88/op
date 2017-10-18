@@ -27,13 +27,13 @@
 	var design_product_id = <?php echo $product_id; ?>;
 	var area_design = <?php echo str_replace("px","",$design_info['design']['area']['front']); ?>;
 	var qty = <?php echo $minimum; ?>;
-	$('#ssi-upload').ssi_uploader({url:'/tshirtecommerce/ajax.php?type=upload&remove=0',maxFileSize:6,siteURL:baseurl,allowed:['jpg','gif','png'],design:{front:front_design['1'],area:area_design,product_id:design_product_id,design_info:info_dsign,quantity:qty}}); 
+	$('#ssi-upload').ssi_uploader({url:'/tshirtecommerce/ajax.php?type=upload&remove=0',maxFileSize:10,siteURL:baseurl,allowed:['jpg', 'jpeg', 'png', 'bmp', 'gif'],design:{front:front_design['1'],area:area_design,product_id:design_product_id,design_info:info_dsign,quantity:qty}}); 
 	$(document).ready(function(){
 		var width = $(window).width();
 		if(width<=500){
 			$('.megamenuToogle-wrapper').attr('style','display:none;');
 			$('.logo').attr('style','padding:7px;');
-			$('#header-center.col-sm-4').attr('style','display:none;');
+			$('.slider-header').attr('style','display:none;');
 			$('#header-right.col-sm-4').attr('style','display:none;');
 			$('#header-left.col-sm-4').attr('style','height: 45px;padding:0px');
 			$('.dropdown').attr('style','height:20px;');
@@ -50,6 +50,9 @@
 	
 	display:none;
 }
+/*.megamenu-background{
+	display:none;
+}*/
 /*.megamenuToogle-wrapper{
 display:none;
 }*/
